@@ -1,6 +1,6 @@
 # SPEC 01 — Home · Panel de Control de Aula y Guardería
 
-> **Estado:** Borrador
+> **Estado:** Aprobado
 > **Depende de:** Ninguna (spec 01)
 > **Fecha:** 2026-09-20
 > **Objetivo:** Reemplazar el boilerplate de `app/` por un home `/` que replique fielmente la plantilla `references/pantallas/panelDecontrolyGuarderia.html` con estilo idéntico, interacciones ligeras en el cliente y datos ficticios en `data/mock.ts`, sin autenticación ni base de datos.
