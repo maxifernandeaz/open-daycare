@@ -9,7 +9,36 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 <!-- END:nextjs-agent-rules -->
 
 
-## MCPs
+## Stack
 
-- Playwright Screenshots y cualquier cosa relacionada a Playwright tienen que estar en la carpeta .playwright-mcp.
-- Context7 Usaremos este MCP para traer la documentacion actualizada del framework. 
+- Next.js **16.3.5** (App Router) + React **19.2** + TypeScript strict. Confirma APIs contra `node_modules/next/dist/docs/` o Context7 antes de codificar.
+- Tailwind CSS **v4**: no hay `tailwind.config.*`; el theme vive en `app/globals.css` (`@import "tailwindcss"` + `@theme inline`). Dark mode vía `prefers-color-scheme` (CSS), no `.dark` class.
+- Alias de import: `@/*` → raíz del repo.
+
+## Comandos
+
+- `npm run dev` (puerto 3000) · `npm run lint` · `npm run build`.
+- No hay test runner configurado. Typecheck manual: `npx tsc --noEmit`.
+
+## Estructura
+
+- `app/` es el único código de la app (hoy sigue siendo el boilerplate de create-next-app).
+- `references/pantallas/*.html` y `references/screenshots/` = mockups de diseño (HTML standalone con Tailwind CDN, Material 3, fuente Plus Jakarta Sans). Son la fuente de verdad del UI objetivo, NO parte del build.
+- Flujo spec-driven: las skills `/spec` y `/spec-impl` (`.agents/skills/`) escriben specs en `specs/NN-slug.md` (estado `Draft`→`Approved`, idioma = idioma del prompt) y `spec-impl` crea la rama `spec-NN-slug`.
+
+## Convenciones
+
+- UI y textos en **español** (ver referencias: "Portal Familias", "Panel de Control de Aula y Guardería").
+
+## MCPs (ver opencode.json)
+
+- Playwright: cualquier screenshot, snapshot, log o console output va a `.playwright-mcp/` (en `.gitignore`).
+- Context7: usar para traer documentación actualizada de librerías/frameworks (Next 16 rompe con versiones previas).
+
+## Spec Driven Development - Skill
+- /spec Usaremos esta habilidad para crear las especificaciones.
+- /spec-impl Usaremos esta skill para hacer las implementaciones. 
+
+## Reglas de codigo 
+
+- Usar codigo limpio, nombres, funciones, variables, etc. en ingles 
