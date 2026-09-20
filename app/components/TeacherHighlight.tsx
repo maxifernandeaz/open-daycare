@@ -2,13 +2,13 @@
 
 /* eslint-disable @next/next/no-img-element */
 
+import { useState } from "react";
 import type { TeacherPost } from "@/data/mock";
 import Icon from "@/app/components/Icons";
 
 type TeacherHighlightProps = {
   post: TeacherPost;
   onNotify?: (message: string) => void;
-  onRespond?: () => void;
 };
 
 function teacherInitials(fullName: string) {
@@ -22,8 +22,28 @@ function teacherInitials(fullName: string) {
 export default function TeacherHighlight({
   post,
   onNotify,
-  onRespond,
 }: TeacherHighlightProps) {
+  const [isLiked, setIsLiked] = useState(false);
+  const [replyVisible, setReplyVisible] = useState(false);
+  const [replyText, setReplyText] = useState("");
+
+  const toggleLike = () => {
+    const nextLiked = !isLiked;
+    setIsLiked(nextLiked);
+    if (nextLiked) {
+      onNotify?.("¡Has enviado un 'Me encanta' a la tutora!");
+    }
+  };
+
+  const focusTeacherMessage = () => setReplyVisible((prev) => !prev);
+
+  const sendTeacherMessage = () => {
+    const text = replyText.trim();
+    if (!text) return;
+    onNotify?.(`Mensaje enviado a Elena Morales: "${text}"`);
+    setReplyText("");
+    setReplyVisible(false);
+  };
   return (
     <article className="bg-surface-container-lowest rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-all">
       <div className="p-6 pb-4 flex items-center justify-between">
@@ -81,10 +101,16 @@ export default function TeacherHighlight({
           <div className="flex items-center gap-2">
             <button
               className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-surface-container-low hover:bg-error-container hover:text-on-error-container text-on-surface-variant font-label-md text-label-md transition-colors"
+              onClick={toggleLike}
               type="button"
             >
-              <Icon name="favorite" size={18} />
-              <span>{post.likesLabel}</span>
+              <Icon
+                name="favorite"
+                size={18}
+                fill={isLiked}
+                className={isLiked ? "text-error" : ""}
+              />
+              <span>{isLiked ? "13 familias y profes (Tú)" : post.likesLabel}</span>
             </button>
             <button
               className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface-variant font-label-md text-label-md transition-colors"
@@ -99,13 +125,34 @@ export default function TeacherHighlight({
           </div>
           <button
             className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-secondary-fixed text-on-secondary-fixed hover:bg-secondary hover:text-on-secondary font-label-md text-label-md transition-all shadow-sm"
-            onClick={() => onRespond?.()}
+            onClick={focusTeacherMessage}
             type="button"
           >
             <Icon name="chat" size={18} />
             Responder a Elena M.
           </button>
         </div>
+        {replyVisible && (
+          <div className="pt-2">
+            <div className="flex items-center gap-2 bg-surface-container-low p-2 rounded-2xl">
+              <input
+                aria-label="Escribe una nota cariñosa a la tutora"
+                className="flex-1 bg-transparent px-3 py-1.5 font-body-md text-body-md text-on-surface focus:outline-none placeholder:text-outline"
+                onChange={(event) => setReplyText(event.target.value)}
+                placeholder="Escribe una nota cariñosa a la tutora..."
+                type="text"
+                value={replyText}
+              />
+              <button
+                className="px-4 py-2 rounded-xl bg-primary-container text-on-primary font-label-md text-label-md font-semibold hover:bg-primary transition-colors"
+                onClick={sendTeacherMessage}
+                type="button"
+              >
+                Enviar
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </article>
   );

@@ -1,30 +1,66 @@
+"use client";
+
 /* eslint-disable @next/next/no-img-element */
 
+import { useState } from "react";
 import ChildSummary from "@/app/components/ChildSummary";
 import MetricCards from "@/app/components/MetricCards";
 import TeacherHighlight from "@/app/components/TeacherHighlight";
 import TimelineSection from "@/app/components/TimelineSection";
 import SafetySidebar from "@/app/components/SafetySidebar";
-import { dailyHome, homeConfig } from "@/data/mock";
+import PickupModal from "@/app/components/PickupModal";
+import Toast from "@/app/components/Toast";
+import { dailyHome, homeConfig, type AuthorizedPerson } from "@/data/mock";
 
 export default function HomePage() {
   const { child, metrics, timeline, highlight } = dailyHome;
+
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authorizedPeople, setAuthorizedPeople] = useState<AuthorizedPerson[]>(
+    homeConfig.authorizedPeople
+  );
+
+  const notify = (message: string) => setToastMessage(message);
+
+  const openAuthModal = () => setAuthModalOpen(true);
+  const closeAuthModal = () => setAuthModalOpen(false);
+
+  const confirmAuth = (personName: string) => {
+    setAuthModalOpen(false);
+    const newPerson: AuthorizedPerson = {
+      id: `person-${Date.now()}`,
+      name: personName,
+      relation: "Familiar autorizado",
+      dni: "DNI nuevo",
+      badge: "Hoy",
+    };
+    setAuthorizedPeople((people) => [...people, newPerson]);
+    notify(`Autorización creada con éxito para ${personName}. Pase QR disponible.`);
+  };
+
+  const config = { ...homeConfig, authorizedPeople };
 
   return (
     <>
       <main className="flex-1 w-full">
         <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-6">
-          <ChildSummary child={child} />
+          <ChildSummary child={child} onNotify={notify} onOpenAuth={openAuthModal} />
           <MetricCards metrics={metrics} />
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             <div className="lg:col-span-8 flex flex-col gap-6">
-              <TeacherHighlight post={highlight} />
+              <TeacherHighlight post={highlight} onNotify={notify} />
               <TimelineSection
                 events={timeline}
                 feedDate={homeConfig.dates.feedDate}
               />
             </div>
-            <SafetySidebar config={homeConfig} childName={child.name} />
+            <SafetySidebar
+              config={config}
+              childName={child.name}
+              onNotify={notify}
+              onOpenAuth={openAuthModal}
+            />
           </div>
         </div>
       </main>
@@ -53,6 +89,13 @@ export default function HomePage() {
           </div>
         </div>
       </footer>
+      <PickupModal
+        childName={child.name}
+        onClose={closeAuthModal}
+        onConfirm={confirmAuth}
+        open={authModalOpen}
+      />
+      <Toast message={toastMessage} />
     </>
   );
 }
