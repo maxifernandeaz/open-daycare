@@ -84,7 +84,7 @@ export default function TeacherHighlight({
             {post.placeLabel}
           </span>
           <button
-            className="px-3 py-1.5 rounded-xl bg-surface-container-lowest/90 hover:bg-surface-container-lowest text-on-surface backdrop-blur-md font-label-sm text-label-sm flex items-center gap-1.5 shadow-sm transition-all"
+            className="pointer-events-auto px-3 py-1.5 rounded-xl bg-surface-container-lowest/90 hover:bg-surface-container-lowest text-on-surface backdrop-blur-md font-label-sm text-label-sm flex items-center gap-1.5 shadow-sm transition-all"
             onClick={() => onNotify?.("Descargando imagen en alta resolución...")}
             type="button"
           >
