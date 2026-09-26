@@ -4,7 +4,7 @@ import { SIDEBAR_WIDTH_CLASS } from "./shell";
 import { classroomShell } from "@/data/mock-classroom";
 
 const ACTIVE_NAV_ITEM_CLASSES =
-  "flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-primary-container text-on-primary font-bold shadow-[0_4px_12px_rgba(16,185,129,0.25)]";
+  "flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-label-lg text-label-lg bg-primary-container text-on-primary font-bold shadow-[0_4px_12px_rgba(16,185,129,0.25)]";
 
 const NAV_ITEM_CLASSES =
   "flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors";

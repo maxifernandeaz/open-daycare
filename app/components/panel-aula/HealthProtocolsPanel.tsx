@@ -36,7 +36,7 @@ export default function HealthProtocolsPanel() {
 
   return (
     <PanelCard
-      action={<Icon className={INFO_ICON_CLASSES} name="info" />}
+      action={<Icon className={INFO_ICON_CLASSES} name="info" size={24} />}
       icon="emergency"
       iconTone="error"
       subtitle="4 alertas en seguimiento"

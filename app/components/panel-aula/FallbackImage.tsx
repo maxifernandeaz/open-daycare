@@ -2,6 +2,8 @@
 
 /* eslint-disable @next/next/no-img-element */
 
+import { useEffect, useRef } from "react";
+
 type FallbackImageProps = {
   src: string;
   alt: string;
@@ -11,6 +13,14 @@ type FallbackImageProps = {
   initialsClassName?: string;
 };
 
+function applyFallback(image: HTMLImageElement, fallbackSrc?: string) {
+  if (fallbackSrc && !image.src.endsWith(fallbackSrc)) {
+    image.src = fallbackSrc;
+    return;
+  }
+  image.style.visibility = "hidden";
+}
+
 export default function FallbackImage({
   src,
   alt,
@@ -19,8 +29,19 @@ export default function FallbackImage({
   initials,
   initialsClassName = "",
 }: FallbackImageProps) {
+  const imageRef = useRef<HTMLImageElement>(null);
+
+  // SSR images start loading while parsing the HTML, so the error can fire
+  // before React attaches its handlers. Re-check once mounted.
+  useEffect(() => {
+    const image = imageRef.current;
+    if (image?.complete && image.naturalWidth === 0) {
+      applyFallback(image, fallbackSrc);
+    }
+  }, [src, fallbackSrc]);
+
   return (
-    <>
+    <span className="relative inline-block align-middle">
       {initials ? (
         <span
           aria-hidden="true"
@@ -30,18 +51,12 @@ export default function FallbackImage({
         </span>
       ) : null}
       <img
+        ref={imageRef}
         alt={alt}
-        className={`${initials ? "relative" : ""} ${className}`}
-        onError={(event) => {
-          const image = event.currentTarget;
-          if (fallbackSrc && !image.src.endsWith(fallbackSrc)) {
-            image.src = fallbackSrc;
-            return;
-          }
-          image.style.visibility = "hidden";
-        }}
+        className={`block ${initials ? "relative" : ""} ${className}`}
+        onError={(event) => applyFallback(event.currentTarget, fallbackSrc)}
         src={src}
       />
-    </>
+    </span>
   );
 }

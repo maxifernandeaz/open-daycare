@@ -53,7 +53,7 @@ export default function KpiCard({ kpi }: KpiCardProps) {
           iconSize={14}
           size="md"
           tone={kpi.badgeTone}
-          weight={kpi.badgeIcon ? "bold" : "medium"}
+          weight={kpi.badgeIcon ? "bold" : "semibold"}
         >
           {kpi.badge}
         </Tag>

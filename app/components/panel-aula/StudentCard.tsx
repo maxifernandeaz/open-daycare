@@ -118,7 +118,7 @@ export default function StudentCard({ student }: StudentCardProps) {
               shape="soft"
               size="md"
               tone={student.healthTag.tone}
-              weight={isAbsent ? "medium" : "bold"}
+              weight="bold"
             >
               {student.healthTag.text}
             </Tag>

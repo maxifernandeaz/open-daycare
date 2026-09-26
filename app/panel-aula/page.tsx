@@ -23,9 +23,9 @@ export default function PanelAulaPage() {
       <AppSidebar />
       <AppHeader />
       <main
-        className={`relative ${MAIN_TOP_CLASS} ${SIDEBAR_OFFSET_CLASS} w-full px-8 bg-background min-h-screen`}
+        className={`relative ${MAIN_TOP_CLASS} ${SIDEBAR_OFFSET_CLASS} w-full bg-background min-h-screen font-body-md text-body-md`}
       >
-        <div className="flex flex-col w-full pb-16 space-y-6">
+        <div className="flex flex-col w-full px-8 pb-16 space-y-6">
           <OpsHero />
           <KpiRow />
           <ActionDock />

@@ -14,9 +14,9 @@ export default function AppHeader() {
 
   return (
     <header
-      className={`fixed top-0 ${SIDEBAR_LEFT_CLASS} right-0 ${HEADER_HEIGHT_CLASS} bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_1px_12px_rgba(0,0,0,0.03)] z-40 px-6`}
+      className={`fixed top-0 left-0 ${SIDEBAR_LEFT_CLASS} right-0 ${HEADER_HEIGHT_CLASS} bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_1px_12px_rgba(0,0,0,0.03)] z-40 px-6`}
     >
-      <div className="h-full w-full flex items-center justify-between gap-4">
+      <div className="h-full w-full flex items-center justify-between gap-4 max-lg:overflow-x-auto max-lg:[&>*]:shrink-0">
         <div className="flex items-center gap-3">
           <div className={SELECTOR_CLASSES}>
             <Icon className="text-primary" name={header.classroomSelector.icon} size={20} />
