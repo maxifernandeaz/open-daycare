@@ -35,6 +35,7 @@ export const classroomShell = {
   brand: {
     logo: brandLogo,
     logoAlt: "KiddiCare Logo",
+    initials: "KC",
     name: "KiddiCare",
     tagline: "Gestión Infantil 360°",
   },

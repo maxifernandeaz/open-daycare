@@ -18,7 +18,7 @@ const QUICK_ACTION_CLASSES =
   "inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md text-label-md transition-colors active:scale-95";
 
 const FILTER_TRACK_CLASSES =
-  "flex items-center gap-1.5 bg-surface-container-low p-1.5 rounded-xl self-start lg:self-auto overflow-x-auto max-w-full";
+  "flex flex-wrap lg:flex-nowrap items-center gap-1.5 bg-surface-container-low p-1.5 rounded-xl self-start lg:self-auto max-w-full";
 
 const FILTER_ACTIVE_CLASSES =
   "px-3 py-1.5 rounded-lg bg-surface-container-lowest shadow-sm font-label-sm text-label-sm text-on-surface font-bold whitespace-nowrap";

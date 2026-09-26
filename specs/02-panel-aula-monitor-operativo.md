@@ -18,7 +18,7 @@
 - `data/mock-classroom.ts` con los datos ficticios tipados.
 - Un único token nuevo en `app/globals.css`: `--font-display-lg` y `--text-display-lg` (40px / 48px / -0.02em / 700), que el mockup usa en los valores de los KPI y hoy no existe.
 - Imágenes con `<img>` + `onError` y respaldo (Unsplash en fotos grandes, iniciales en avatares), con disable de `@next/next/no-img-element` por archivo.
-- Responsive: por debajo de `lg` el aside se oculta y el main pierde el `pl-72`; el contenido se apila en una columna.
+- Responsive: por debajo de `lg` el aside se oculta y el main pierde el `pl-72`; el contenido se apila en una columna. El track de pills de `ActionDock` y la fila de cabecera de `StudentRoster` llevan `flex-wrap` para que la página no tenga scroll horizontal a 375px.
 
 **Out of scope (para specs futuros):**
 
@@ -106,7 +106,7 @@ Dos exports singleton: `classroomShell` (centro, `navItems`, tarjeta de soporte,
 - [ ] El rail derecho muestra 3 alertas de protocolos con su punto de tono, 3 turnos de recogida (uno de ellos con el badge "DNI Req." y el DNI cotejado) y 3 entradas de bitácora sobre una línea de tiempo vertical.
 - [ ] Todos los iconos Material Symbols renderizan el glifo a partir del nombre de ligadura del mockup, sin cuadros de glifo faltante.
 - [ ] Ninguna imagen queda rota: cada una tiene respaldo por `onError`, y los avatares caen a iniciales.
-- [ ] Ningún botón, input ni pill produce ningún efecto: la página no contiene `"use client"` ni hooks de estado.
+- [ ] Ningún botón, input ni pill produce ningún efecto: la página no contiene `"use client"` ni hooks de estado, con la única excepción de `app/components/panel-aula/FallbackImage.tsx`, que es un Client Component aislado porque un `onError` DOM no puede existir en un Server Component.
 - [ ] El `title` y la `description` de `/panel-aula` están en español y son específicos de esta pantalla.
 - [ ] `npm run lint`, `npx tsc --noEmit` y `npm run build` pasan sin errores, y la consola del navegador queda limpia en `/panel-aula`.
 - [ ] `GET /` sigue renderizando exactamente igual que antes: `git diff` no muestra cambios en `app/page.tsx`, en los componentes de SPEC 01 ni en `data/mock.ts`.
@@ -119,7 +119,7 @@ Dos exports singleton: `classroomShell` (centro, `navItems`, tarjeta de soporte,
 - **Sí:** `data/mock-classroom.ts` aparte de `data/mock.ts`. Los dos dominios no comparten ningún tipo salvo `Tone`, que aquí se declara local.
 - **Sí:** subcarpeta `app/components/panel-aula/`. Desvía de la carpeta plana de SPEC 01, pero son 14 archivos nuevos de otro dominio y mezclarlos con los de familias haría la navegación confusa.
 - **Sí:** añadir solo el token `display-lg` a `globals.css`. Se comprobó token por token que los 50 colores del config del mockup ya existen en el `@theme`.
-- **Sí:** `<img>` con `onError` en lugar de `next/image`. Las fotos son URLs externas de un host no configurado y el mockup no define tamaños; requiere `remotePatterns` para nada más.
+- **Sí:** `<img>` con `onError` en lugar de `next/image`. Las fotos son URLs externas de un host no configurado y el mockup no define tamaños; requiere `remotePatterns` para nada más. Esto obliga a que `FallbackImage.tsx` sea el único Client Component de la ruta: en RSC un `onError` DOM no se puede renderizar. La prohibición de `"use client"` del alcance aplica a `app/panel-aula/page.tsx` y a sus componentes de presentación, no a ese helper.
 - **Sí:** `metadata` propio en la ruta. El `title` del layout dice "Portal Familias" y sería incorrecto en esta pantalla.
 - **No:** estado para búsqueda y filtros. Functionalidad de verdad, que es lo que mockedea el mockup, va en su propio spec.
 - **No:** drawer móvil, toasts, modales, autenticación, persistencia, modo oscuro y librerías nuevas.

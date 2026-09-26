@@ -20,7 +20,9 @@ export default function AppSidebar() {
         <div className="h-20 flex items-center gap-3 px-6">
           <FallbackImage
             alt={brand.logoAlt}
-            className="h-8 w-auto object-contain"
+            className="h-8 w-8 rounded-lg object-contain"
+            initials={brand.initials}
+            initialsClassName="rounded-lg bg-primary-container text-on-primary font-headline-sm text-headline-sm font-bold"
             src={brand.logo}
           />
           <div className="flex flex-col">
