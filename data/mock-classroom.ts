@@ -122,6 +122,7 @@ export const classroomPanel = {
       unit: "/ 18 niños",
       footnote: { dotTone: "outline", text: "2 ausencias notificadas", textTone: "outline" },
       link: "Ver bajas",
+      linkTone: "primary",
     },
     {
       id: "canteen",
@@ -149,6 +150,7 @@ export const classroomPanel = {
       value: "12",
       valueTone: "primary",
       unit: "durmiendo",
+      unitTone: "surface",
       aside: "4 despiertos",
       progress: {
         segments: [
@@ -171,6 +173,7 @@ export const classroomPanel = {
       unit: "autorizaciones",
       footnote: { icon: "verified_user", dotTone: "tertiary", text: "1 con DNI delegado", textTone: "surface" },
       link: "Ver cola",
+      linkTone: "secondary",
     },
   ] satisfies KpiCard[],
   quickActions: [
@@ -462,10 +465,12 @@ export type KpiCard = {
   value: string;
   valueTone?: Tone;
   unit: string;
+  unitTone?: Tone;
   aside?: string;
   progress?: { segments: { width: number; tone: Tone }[]; suffix: string; suffixTone: Tone };
   footnote?: { icon?: string; dotTone?: Tone; text: string; textTone?: Tone };
   link?: string;
+  linkTone?: Tone;
 };
 
 export type QuickAction = { label: string; icon: string; iconTone: Tone };
