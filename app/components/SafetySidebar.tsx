@@ -133,7 +133,7 @@ export default function SafetySidebar({
             </div>
           </div>
           <button
-            className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-primary-container text-on-primary font-label-md text-label-md font-bold hover:bg-primary transition-all shadow-sm active:scale-[0.98]"
+            className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-primary-container text-on-primary font-label-md text-label-md font-bold hover:bg-primary transition-all shadow-sm active:scale-98"
             onClick={() =>
               onNotify?.("Enlace y código QR seguro copiados para enviar a la Abuela Carmen")
             }

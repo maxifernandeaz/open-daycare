@@ -2,7 +2,7 @@
 
 /* eslint-disable @next/next/no-img-element */
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { TeacherPost } from "@/data/mock";
 import Icon from "@/app/components/Icons";
 
@@ -26,6 +26,14 @@ export default function TeacherHighlight({
   const [isLiked, setIsLiked] = useState(false);
   const [replyVisible, setReplyVisible] = useState(false);
   const [replyText, setReplyText] = useState("");
+  const imageRef = useRef<HTMLImageElement>(null);
+
+  useEffect(() => {
+    const image = imageRef.current;
+    if (image?.complete && image.naturalWidth === 0) {
+      image.src = post.fallbackImage;
+    }
+  }, [post.fallbackImage]);
 
   const toggleLike = () => {
     const nextLiked = !isLiked;
@@ -75,8 +83,12 @@ export default function TeacherHighlight({
           alt="Mateo jugando concentrado y sonriendo con cubos sensoriales y maderas de colores en la alfombra del aula"
           className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
           onError={(event) => {
-            event.currentTarget.src = post.fallbackImage;
+            const image = event.currentTarget;
+            if (image.src !== post.fallbackImage) {
+              image.src = post.fallbackImage;
+            }
           }}
+          ref={imageRef}
           src={post.image}
         />
         <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between pointer-events-none">

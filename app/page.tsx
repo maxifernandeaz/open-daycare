@@ -9,19 +9,20 @@ import TeacherHighlight from "@/app/components/TeacherHighlight";
 import TimelineSection from "@/app/components/TimelineSection";
 import SafetySidebar from "@/app/components/SafetySidebar";
 import PickupModal from "@/app/components/PickupModal";
-import Toast from "@/app/components/Toast";
+import Toast, { type ToastNotification } from "@/app/components/Toast";
 import { dailyHome, homeConfig, type AuthorizedPerson } from "@/data/mock";
 
 export default function HomePage() {
   const { child, metrics, timeline, highlight } = dailyHome;
 
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [toast, setToast] = useState<ToastNotification | null>(null);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authorizedPeople, setAuthorizedPeople] = useState<AuthorizedPerson[]>(
     homeConfig.authorizedPeople
   );
 
-  const notify = (message: string) => setToastMessage(message);
+  const notify = (message: string) =>
+    setToast((current) => ({ id: (current?.id ?? 0) + 1, message }));
 
   const openAuthModal = () => setAuthModalOpen(true);
   const closeAuthModal = () => setAuthModalOpen(false);
@@ -95,7 +96,7 @@ export default function HomePage() {
         onConfirm={confirmAuth}
         open={authModalOpen}
       />
-      <Toast message={toastMessage} />
+      <Toast notification={toast} />
     </>
   );
 }

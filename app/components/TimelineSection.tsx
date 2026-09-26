@@ -45,7 +45,7 @@ export default function TimelineSection({
           En directo
         </span>
       </div>
-      <div className="relative pl-6 sm:pl-8 flex flex-col gap-8 before:absolute before:left-[15px] sm:before:left-[19px] before:top-3 before:bottom-3 before:w-[2px] before:bg-surface-container-high before:content-['']">
+      <div className="relative pl-6 sm:pl-8 flex flex-col gap-8 before:absolute before:left-[15px] sm:before:left-[19px] before:top-3 before:bottom-3 before:w-[2px] before:bg-surface-container-high">
         {events.map((event) => {
           const titleChip = event.meta.find((item) => item.tone === "error");
           const metaItems = event.meta.filter((item) => item.tone !== "error");

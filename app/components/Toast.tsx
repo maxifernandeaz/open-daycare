@@ -3,24 +3,26 @@
 import { useEffect, useState } from "react";
 import Icon from "@/app/components/Icons";
 
+export type ToastNotification = { id: number; message: string };
+
 type ToastProps = {
-  message: string | null;
+  notification: ToastNotification | null;
 };
 
 const TOAST_DURATION_MS = 3500;
 
-export default function Toast({ message }: ToastProps) {
+export default function Toast({ notification }: ToastProps) {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    if (!message) return;
+    if (!notification) return;
     const appearFrame = window.requestAnimationFrame(() => setVisible(true));
     const hideTimer = window.setTimeout(() => setVisible(false), TOAST_DURATION_MS);
     return () => {
       window.cancelAnimationFrame(appearFrame);
       window.clearTimeout(hideTimer);
     };
-  }, [message]);
+  }, [notification]);
 
   return (
     <div
@@ -32,7 +34,7 @@ export default function Toast({ message }: ToastProps) {
       }`}
     >
       <Icon name="check_circle" size={20} fill className="text-primary-fixed" />
-      <span className="font-label-lg text-label-lg">{message}</span>
+      <span className="font-label-lg text-label-lg">{notification?.message}</span>
     </div>
   );
 }

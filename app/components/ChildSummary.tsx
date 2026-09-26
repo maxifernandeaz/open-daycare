@@ -2,6 +2,7 @@
 
 /* eslint-disable @next/next/no-img-element */
 
+import { useEffect, useRef } from "react";
 import type { ChildInfo } from "@/data/mock";
 import Icon from "@/app/components/Icons";
 
@@ -16,6 +17,15 @@ export default function ChildSummary({
   onNotify,
   onOpenAuth,
 }: ChildSummaryProps) {
+  const photoRef = useRef<HTMLImageElement>(null);
+
+  useEffect(() => {
+    const photo = photoRef.current;
+    if (photo?.complete && photo.naturalWidth === 0) {
+      photo.src = child.fallbackPhoto;
+    }
+  }, [child.photo, child.fallbackPhoto]);
+
   return (
     <section className="bg-surface-container-lowest rounded-3xl p-6 sm:p-8 shadow-sm relative overflow-hidden">
       <div className="absolute -right-20 -top-20 w-80 h-80 bg-primary-container/10 rounded-full blur-3xl pointer-events-none" />
@@ -28,8 +38,12 @@ export default function ChildSummary({
                 alt={`${child.name} sonriendo feliz en clase`}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 onError={(event) => {
-                  event.currentTarget.src = child.fallbackPhoto;
+                  const photo = event.currentTarget;
+                  if (photo.src !== child.fallbackPhoto) {
+                    photo.src = child.fallbackPhoto;
+                  }
                 }}
+                ref={photoRef}
                 src={child.photo}
               />
             </div>
