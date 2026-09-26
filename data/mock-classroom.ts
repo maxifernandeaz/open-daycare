@@ -189,6 +189,11 @@ export const classroomPanel = {
     { label: "En Siesta", count: 12 },
     { label: "Alergias / Meds", count: 4 },
   ] satisfies StatusFilter[],
+  roster: {
+    title: "Alumnos en Aula",
+    totalLabel: "18 Matriculados",
+    searchPlaceholder: "Buscar por nombre o tutor...",
+  } satisfies RosterHeader,
   students: [
     {
       id: "mateo-gomez",
@@ -478,6 +483,12 @@ export type StatusFilter = { label: string; count: number; active?: boolean };
 
 export type HealthTag = { icon: string; text: string; tone: Tone };
 export type DailyIndicator = { icon: string; iconTone: Tone; label: string; value: string };
+
+export type RosterHeader = {
+  title: string;
+  totalLabel: string;
+  searchPlaceholder: string;
+};
 
 export type Student = {
   id: string;
