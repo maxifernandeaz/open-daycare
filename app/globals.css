@@ -4,6 +4,7 @@
   --font-sans: var(--font-jakarta);
   --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
 
+  --font-display-lg: var(--font-jakarta);
   --font-headline-lg: var(--font-jakarta);
   --font-headline-sm: var(--font-jakarta);
   --font-title-md: var(--font-jakarta);
@@ -13,6 +14,11 @@
   --font-label-lg: var(--font-jakarta);
   --font-label-md: var(--font-jakarta);
   --font-label-sm: var(--font-jakarta);
+
+  --text-display-lg: 40px;
+  --text-display-lg--line-height: 48px;
+  --text-display-lg--letter-spacing: -0.02em;
+  --text-display-lg--font-weight: 700;
 
   --text-headline-lg: 28px;
   --text-headline-lg--line-height: 36px;
