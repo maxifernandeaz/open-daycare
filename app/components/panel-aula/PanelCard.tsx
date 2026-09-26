@@ -5,7 +5,8 @@ import type { Tone } from "@/data/mock-classroom";
 
 type PanelCardProps = {
   icon: string;
-  iconTone: Tone;
+  iconTone?: Tone;
+  iconClassName?: string;
   title: string;
   subtitle: string;
   action?: ReactNode;
@@ -16,12 +17,16 @@ type PanelCardProps = {
 export default function PanelCard({
   icon,
   iconTone,
+  iconClassName,
   title,
   subtitle,
   action,
   className = "",
   children,
 }: PanelCardProps) {
+  const iconClasses =
+    iconClassName ?? (iconTone ? TONE_CONTAINER_CLASSES[iconTone] : "");
+
   return (
     <section
       className={`p-5 rounded-xl bg-surface-container-lowest shadow-sm space-y-4 ${className}`}
@@ -29,7 +34,7 @@ export default function PanelCard({
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <div
-            className={`w-8 h-8 rounded-lg flex items-center justify-center ${TONE_CONTAINER_CLASSES[iconTone]}`}
+            className={`w-8 h-8 rounded-lg flex items-center justify-center ${iconClasses}`}
           >
             <Icon name={icon} size={18} />
           </div>
