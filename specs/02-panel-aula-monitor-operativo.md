@@ -1,6 +1,6 @@
 # SPEC 02 — Panel de Aula · Monitor Operativo
 
-> **Estado:** aprobado
+> **Estado:** implementado
 > **Depende de:** SPEC 01
 > **Fecha:** 2026-09-26
 > **Objetivo:** Crear la ruta `/panel-aula` que replique el mockup `references/pantallas/portalfamilia-feedDiario.html` (Monitor Operativo de Aula) como render estático con datos ficticios en `data/mock-classroom.ts`, sin tocar el home de `/` de SPEC 01.
