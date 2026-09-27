@@ -37,7 +37,11 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ## Spec Driven Development - Skill
 - /spec Usaremos esta habilidad para crear las especificaciones.
-- /spec-impl Usaremos esta skill para hacer las implementaciones. 
+- /spec-impl Usaremos esta skill para hacer las implementaciones.
+
+## Subagente
+
+- `spec-verify` (`.opencode/agents/spec-verify.md`): agente verificador de los *Acceptance criteria* de un spec en `specs/`. Recibe `NN` o la ruta del spec, valida cada criterio con la herramienta adecuada (Playwright + visión para UI, Context7 para APIs de Next.js, `lint`/`tsc`/`build` para código), corrige lo que esté dentro de alcance y marca los checks solo con evidencia verificable (ruta de screenshot, salida de consola o `archivo:línea`). Informe final en español. No modifica `references/`, otros specs ni `specs/.spec-config.yml`.
 
 ## Reglas de codigo 
 
