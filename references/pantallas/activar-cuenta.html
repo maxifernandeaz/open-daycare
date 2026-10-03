@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+
+<html lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Bienvenida a OpenDayCare - Activar Cuenta</title>
+<!-- Google Fonts: Inter & Playfair Display / Source Serif 4 for warm aesthetic -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=Source+Serif+4:ital,opsz,wght@0,8..60,600;0,8..60,700;1,8..60,600&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            serif: ['"Source Serif 4"', 'Georgia', 'serif'],
+          },
+          colors: {
+            brand: {
+              bg: '#FAF6F0',
+              coral: '#ED785C',
+              'coral-hover': '#DF6A4F',
+              'coral-soft': '#F7A591',
+              card: '#FFFFFF',
+              input: '#FFFFFF',
+              textPrimary: '#1E1E1E',
+              textSecondary: '#66605A',
+              bannerYellow: '#FCF5E3',
+              avatarBlue: '#9BCDE4',
+            }
+          },
+          boxShadow: {
+            'soft': '0 2px 10px rgba(0, 0, 0, 0.03), 0 1px 3px rgba(0, 0, 0, 0.02)',
+            'btn': '0 4px 14px rgba(237, 120, 92, 0.35)',
+          }
+        }
+      }
+    }
+  </script>
+<!-- Custom Styles for Typography & UI Polish -->
+<style data-purpose="custom-enhancements">
+    body {
+      background-color: #FAF6F0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    
+    .font-serif-title {
+      font-family: 'Source Serif 4', Georgia, serif;
+    }
+
+    /* Style for dots in password display */
+    .password-dots {
+      letter-spacing: 0.25em;
+      font-size: 1.25rem;
+      line-height: 1;
+    }
+
+    /* Focus ring styling to match soft coral theme */
+    input:focus {
+      outline: none !important;
+      border-color: #ED785C !important;
+      box-shadow: 0 0 0 3px rgba(237, 120, 92, 0.18) !important;
+    }
+  </style>
+</head>
+<body class="min-h-screen w-full flex items-center justify-center p-4 sm:p-6 lg:p-10 text-brand-textPrimary">
+<!-- BEGIN: ActivationContainer -->
+<main class="w-full max-w-[540px] flex flex-col items-start mx-auto py-6 sm:py-10" data-purpose="main-form-card">
+<!-- BEGIN: HeaderSection -->
+<header class="w-full mb-7" data-purpose="page-header">
+<!-- Brand Logo / Sun Icon Badge -->
+<div class="w-14 h-14 rounded-2xl bg-gradient-to-b from-[#FFA280] to-[#EB7457] flex items-center justify-center shadow-sm mb-6" data-purpose="brand-icon">
+<svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" viewbox="0 0 24 24">
+<!-- Sun Center -->
+<circle cx="12" cy="12" fill="none" r="4.5"></circle>
+<!-- Sun Rays -->
+<line x1="12" x2="12" y1="2" y2="4.5"></line>
+<line x1="12" x2="12" y1="19.5" y2="22"></line>
+<line x1="2" x2="4.5" y1="12" y2="12"></line>
+<line x1="19.5" x2="22" y1="12" y2="12"></line>
+<line x1="4.93" x2="6.7" y1="4.93" y2="6.7"></line>
+<line x1="17.3" x2="19.07" y1="17.3" y2="19.07"></line>
+<line x1="4.93" x2="6.7" y1="19.07" y2="17.3"></line>
+<line x1="17.3" x2="19.07" y1="6.7" y2="4.93"></line>
+</svg>
+</div>
+<!-- Main Welcome Title -->
+<h1 class="font-serif-title text-3xl sm:text-[34px] font-bold tracking-tight text-[#222120] mb-2 leading-tight">
+        Bienvenida a OpenDayCare
+      </h1>
+<!-- Informative Subtitle -->
+<p class="text-brand-textSecondary text-[15px] sm:text-base leading-relaxed">
+        Te invitaron a seguir el día de tu hijo. Creá tu contraseña para activar la cuenta.
+      </p>
+</header>
+<!-- END: HeaderSection -->
+<!-- BEGIN: ChildInfoBadge -->
+<!-- Card showing who invited the user and the child's classroom -->
+<section class="w-full bg-white rounded-2xl p-4 sm:p-5 flex items-center gap-4 shadow-soft border border-black/[0.04] mb-7" data-purpose="child-summary-card">
+<!-- Child Avatar -->
+<div class="w-12 h-12 rounded-full bg-brand-avatarBlue/80 flex items-center justify-center text-[#1E5773] font-serif-title font-semibold text-xl flex-shrink-0">
+        M
+      </div>
+<!-- Details -->
+<div class="flex flex-col">
+<span class="text-xs sm:text-[13px] text-brand-textSecondary leading-tight mb-1">
+          Te invitaron a seguir a
+        </span>
+<span class="font-serif-title text-base sm:text-[17px] font-bold text-[#1F1E1D]">
+          Mateo · Sala Soles
+        </span>
+</div>
+</section>
+<!-- END: ChildInfoBadge -->
+<!-- BEGIN: ActivationForm -->
+<form class="w-full space-y-5" data-purpose="activation-form" onsubmit="event.preventDefault();">
+<!-- Field 1: Código de Invitación -->
+<div class="space-y-2">
+<label class="block text-xs font-semibold tracking-wider text-brand-textSecondary uppercase" for="invite-code">
+          CÓDIGO DE INVITACIÓN
+        </label>
+<input class="w-full px-4 py-3.5 bg-white border border-[#EADFD3] rounded-xl text-brand-textPrimary font-semibold text-base tracking-widest focus:ring-0 focus:border-[#EADFD3] cursor-default select-none shadow-soft" id="invite-code" readonly="" type="text" value="7 K 4 P 9"/>
+</div>
+<!-- Field 2: Email -->
+<div class="space-y-2">
+<label class="block text-xs font-semibold tracking-wider text-brand-textSecondary uppercase" for="email">
+          EMAIL
+        </label>
+<input class="w-full px-4 py-3.5 bg-white border border-[#EADFD3] rounded-xl text-[#2F2E2C] text-base focus:ring-2 focus:ring-brand-coral/20 focus:border-brand-coral shadow-soft transition-colors" id="email" type="email" value="lucia.fernandez@gmail.com"/>
+</div>
+<!-- Field 3: Crear Contraseña -->
+<div class="space-y-2">
+<label class="block text-xs font-semibold tracking-wider text-brand-textSecondary uppercase" for="password">
+          CREAR CONTRASEÑA
+        </label>
+<!-- Outlined input box mirroring the selected state in the screenshot -->
+<div class="relative">
+<input class="w-full px-4 py-3.5 bg-white border-2 border-brand-coral-soft rounded-xl text-[#1E1E1E] text-base password-dots tracking-widest shadow-soft focus:border-brand-coral focus:ring-0" id="password" placeholder="••••••••••" type="password" value="supersecretpassword"/>
+</div>
+</div>
+<!-- Field 4: Consent / Disclaimer Banner -->
+<div class="w-full bg-[#FCF5E3] rounded-xl p-3.5 sm:p-4 flex items-start sm:items-center gap-3 border border-[#F3E7C9]" data-purpose="consent-banner">
+<label class="relative flex items-center cursor-pointer select-none">
+<input checked="" class="peer sr-only" id="photo-consent" type="checkbox"/>
+<!-- Custom green checkbox container matching the design -->
+<div class="w-6 h-6 bg-[#4CA771] rounded-md flex items-center justify-center text-white peer-focus:ring-2 peer-focus:ring-[#4CA771]/30 transition-all">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24">
+<path d="M4.5 12.75l6 6 9-13.5" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+</label>
+<label class="text-[13px] sm:text-[13.5px] leading-snug text-[#4A443C] font-normal cursor-pointer select-none" for="photo-consent">
+          Autorizo a la guardería a tomar y compartir fotos de mi hijo dentro de la app.
+        </label>
+</div>
+<!-- Submit Action Button -->
+<div class="pt-2">
+<button class="w-full py-4 px-6 bg-brand-coral hover:bg-brand-coral-hover text-white font-medium text-base rounded-2xl shadow-btn transition duration-200 ease-in-out transform active:scale-[0.99] flex items-center justify-center" data-purpose="submit-button" type="submit">
+          Activar mi cuenta
+        </button>
+</div>
+</form>
+<!-- END: ActivationForm -->
+</main>
+<!-- END: ActivationContainer -->
+</body></html>

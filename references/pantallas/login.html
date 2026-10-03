@@ -1,0 +1,166 @@
+<!DOCTYPE html><html lang="es"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>OpenDayCare - Iniciar sesión</title>
+<!-- Tailwind CSS CDN with forms and container queries -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Playfair Display (Serif) & Plus Jakarta Sans (Sans-serif) -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<!-- Tailwind Configuration -->
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['"Playfair Display"', 'Georgia', 'serif'],
+            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+          },
+          colors: {
+            coral: {
+              400: '#f88c6c',
+              500: '#ea6d4d',
+              600: '#d75a3a',
+            },
+            sand: {
+              50: '#FDFBF7',
+              100: '#F9F5EE',
+              200: '#F1E9DC',
+            },
+            terracotta: '#D45D3E'
+          }
+        }
+      }
+    }
+  </script>
+<!-- Custom CSS for organic layered backdrops -->
+<style data-purpose="custom-decorations">
+    .bg-warm-gradient {
+      background: linear-gradient(145deg, #f28b6d 0%, #eb7254 50%, #dc6245 100%);
+    }
+    
+    .organic-shape-1 {
+      position: absolute;
+      width: 460px;
+      height: 460px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0) 70%);
+      top: -120px;
+      right: -130px;
+      pointer-events: none;
+    }
+
+    .organic-shape-2 {
+      position: absolute;
+      width: 380px;
+      height: 380px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.13) 0%, rgba(255, 255, 255, 0) 70%);
+      bottom: -90px;
+      left: -90px;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-3 md:p-6 font-sans antialiased selection:bg-coral-500 selection:text-white bg-[#FAF7F2]">
+<!-- BEGIN: MainContainer -->
+<!-- Outer window mimicking the clean modal/card layout shown in the reference -->
+<main class="w-full max-w-[1080px] bg-[#FAF7F2] rounded-[28px] overflow-hidden flex flex-col md:flex-row min-h-[660px] relative border border-white/20 shadow-sm">
+<!-- BEGIN: LeftBrandedPanel -->
+<!-- Branded warm hero split with coral gradients and organic soft shapes -->
+<section class="relative w-full md:w-[48%] bg-warm-gradient p-8 md:p-12 flex flex-col justify-between overflow-hidden text-white" data-purpose="brand-hero-panel">
+<!-- Decorative background blur elements -->
+<div class="organic-shape-1"></div>
+<div class="organic-shape-2"></div>
+<!-- Top: Platform Brand Identifier -->
+<header class="relative z-10 flex items-center gap-3">
+<!-- Sun icon badge with translucent glass effect -->
+<div class="w-10 h-10 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/25 shadow-sm text-white">
+<svg class="w-5 h-5 text-white stroke-[2.2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<circle cx="12" cy="12" r="4"></circle>
+<path d="M12 2v2"></path>
+<path d="M12 20v2"></path>
+<path d="m4.93 4.93 1.41 1.41"></path>
+<path d="m17.66 17.66 1.41 1.41"></path>
+<path d="M2 12h2"></path>
+<path d="M20 12h2"></path>
+<path d="m6.34 17.66-1.41 1.41"></path>
+<path d="m19.07 4.93-1.41 1.41"></path>
+</svg>
+</div>
+<span class="text-xl font-bold tracking-tight text-white/95">OpenDayCare</span>
+</header>
+<!-- Center: Main value proposition -->
+<div class="relative z-10 my-10 md:my-auto max-w-sm">
+<h1 class="text-3xl sm:text-4xl lg:text-[40px] leading-[1.18] font-serif font-bold text-white tracking-tight">
+          El día de cada niño, compartido con su familia.
+        </h1>
+<p class="mt-5 text-white/85 text-sm sm:text-base leading-relaxed font-normal">
+          Publicá momentos, gestioná las salas y mantené a las familias cerca, desde un solo lugar.
+        </p>
+</div>
+<!-- Bottom: Facility identification badge -->
+<footer class="relative z-10 flex items-center gap-2 text-white/90 text-sm font-medium pt-4">
+<span class="text-base select-none">🌿</span>
+<span class="">Guardería Sala Soles</span>
+</footer>
+</section>
+<!-- END: LeftBrandedPanel -->
+<!-- BEGIN: RightLoginForm -->
+<!-- Warm ivory container housing authentication form without the role selector -->
+<section class="w-full md:w-[52%] bg-[#FAF7F2] p-8 md:p-14 lg:p-16 flex flex-col justify-center relative" data-purpose="login-form-panel">
+<div class="w-full max-w-[390px] mx-auto">
+<!-- Header: Title and subtitle -->
+<header class="mb-8">
+<h2 class="text-3xl font-bold font-serif text-[#2B231F] tracking-tight">Iniciar sesión</h2>
+<p class="mt-2 text-stone-500 text-sm font-medium">Ingresá para ver el día de hoy.</p>
+</header>
+<!-- Form container -->
+<form class="space-y-5" data-purpose="credentials-form" onsubmit="event.preventDefault();">
+<!-- Email input group -->
+<div>
+<label class="block text-[11px] font-bold tracking-wider text-stone-500 uppercase mb-2" for="email">
+              Email
+            </label>
+<div class="relative">
+<input class="w-full px-4 py-3.5 bg-white rounded-xl border border-stone-200 text-stone-800 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-coral-400/40 focus:border-coral-500 text-sm shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition-colors duration-150" id="email" name="email" placeholder="{{ email }}" required="" type="email">
+</div>
+</div>
+<!-- Password input group -->
+<div>
+<label class="block text-[11px] font-bold tracking-wider text-stone-500 uppercase mb-2" for="password">
+              Contraseña
+            </label>
+<div class="relative">
+<input class="w-full px-4 py-3.5 bg-white rounded-xl border border-stone-200 text-stone-800 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-coral-400/40 focus:border-coral-500 text-sm tracking-wider shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition-colors duration-150" id="password" name="password" placeholder="••••••••" required="" type="password">
+</div>
+</div>
+<!-- Forgot password link -->
+<div class="flex justify-end pt-0.5">
+<a class="text-xs font-semibold text-terracotta hover:text-coral-600 transition-colors" href="#">
+              ¿Olvidaste tu contraseña?
+            </a>
+</div>
+<!-- Primary Submit Button -->
+<div class="pt-3">
+<button class="w-full py-3.5 px-6 rounded-xl bg-[#EB7454] hover:bg-[#E06443] active:scale-[0.99] text-white font-medium text-sm transition-all duration-150 shadow-[0_6px_20px_rgba(235,116,84,0.35)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-coral-500" type="submit">
+              Iniciar sesión
+            </button>
+</div>
+</form>
+<!-- Bottom Invitation & Sign-up prompt -->
+<p class="mt-8 text-center text-xs text-stone-500 font-medium">
+          ¿Te invitó la guardería?
+          <a class="font-bold text-terracotta hover:underline ml-1" href="#">
+            Activá tu cuenta
+          </a>
+</p>
+</div>
+</section>
+<!-- END: RightLoginForm -->
+</main>
+<!-- END: MainContainer -->
+
+
+</body></html>
