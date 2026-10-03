@@ -9,7 +9,18 @@ const ACTIVE_NAV_ITEM_CLASSES =
 const NAV_ITEM_CLASSES =
   "flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors";
 
-export default function AppSidebar() {
+const CTA_CLASSES =
+  "flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-primary text-on-primary font-label-lg text-label-lg shadow-[0_4px_14px_rgba(16,185,129,0.25)] hover:opacity-90 transition-opacity";
+
+const NAV_ITEM_HREFS: Record<string, string> = {
+  "alumnos-y-familias": "/agregar-nino",
+};
+
+type AppSidebarProps = {
+  activePath?: string;
+};
+
+export default function AppSidebar({ activePath }: AppSidebarProps) {
   const { brand, center, navItems, support } = classroomShell;
 
   return (
@@ -50,17 +61,32 @@ export default function AppSidebar() {
         </div>
 
         <nav className="flex-1 px-4 py-3 space-y-1.5 overflow-y-auto">
-          {navItems.map((item) => (
-            <a
-              className={item.active ? ACTIVE_NAV_ITEM_CLASSES : NAV_ITEM_CLASSES}
-              href="#"
-              key={item.path}
-            >
-              <Icon name={item.icon} size={20} />
-              <span>{item.label}</span>
-            </a>
-          ))}
+          {navItems.map((item) => {
+            const isActive =
+              activePath === undefined
+                ? Boolean(item.active)
+                : item.path === activePath;
+            const href = NAV_ITEM_HREFS[item.path] ?? "#";
+
+            return (
+              <a
+                className={isActive ? ACTIVE_NAV_ITEM_CLASSES : NAV_ITEM_CLASSES}
+                href={href}
+                key={item.path}
+              >
+                <Icon name={item.icon} size={20} />
+                <span>{item.label}</span>
+              </a>
+            );
+          })}
         </nav>
+
+        <div className="px-4 pb-2">
+          <a className={CTA_CLASSES} href="/agregar-nino">
+            <Icon name="add" size={20} />
+            <span>Agregar alumno</span>
+          </a>
+        </div>
       </div>
 
       <div className="p-4 m-4 bg-surface-container-low rounded-xl flex items-center gap-3">
