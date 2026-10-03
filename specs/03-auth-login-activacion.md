@@ -1,6 +1,6 @@
 # SPEC 03 — Login y Activación de Cuenta
 
-> **Estado:** umplementado
+> **Estado:** implementado
 > **Depende de:** SPEC 02
 > **Fecha:** 2026-09-27
 > **Objetivo:** Crear las rutas `/login` y `/activar-cuenta` que repliquen los mockups `references/pantallas/login.html` y `references/pantallas/activar-cuenta.html` como render estático, traduciendo la paleta cálida (coral/sand) y las tipografías serif del mockup a los tokens globales de `app/globals.css` (Material 3 + Plus Jakarta Sans) y a la marca **KiddiCare / Centro Infantil Sol**.

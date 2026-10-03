@@ -1,6 +1,6 @@
 # SPEC 04 — Agregar Niño · Alta de Ficha
 
-> **Estado:** Aprobado
+> **Estado:** implementado
 > **Depende de:** SPEC 01, SPEC 02
 > **Fecha:** 2026-10-03
 > **Objetivo:** Crear la ruta `/agregar-nino` que replique el mockup `references/pantallas/agregar-niño.png.html` (alta completa de un niño en un solo formulario) con el shell de SPEC 02, datos en `data/mock-enrollment.ts` y solo los chips de alergias y el cálculo de edad en cliente.
