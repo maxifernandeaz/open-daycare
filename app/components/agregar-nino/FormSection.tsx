@@ -25,7 +25,7 @@ export default function FormSection({
   badge,
   trailing,
   compact = false,
-  className = "",
+  className = "bg-surface-container-lowest",
   children,
 }: FormSectionProps) {
   const padding = compact ? "p-6 sm:p-7" : "p-6 sm:p-8";
