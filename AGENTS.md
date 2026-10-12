@@ -14,6 +14,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - Next.js **16.3.5** (App Router) + React **19.2** + TypeScript strict. Confirma APIs contra `node_modules/next/dist/docs/` o Context7 antes de codificar.
 - Tailwind CSS **v4**: no hay `tailwind.config.*`; el theme vive en `app/globals.css` (`@import "tailwindcss"` + `@theme inline`). Dark mode vía `prefers-color-scheme` (CSS), no `.dark` class.
 - Alias de import: `@/*` → raíz del repo.
+- Backend: **Supabase** (Postgres, Auth, RLS, Edge Functions, Storage). Aún no hay dependencias `supabase-js`/`@supabase/ssr` en `package.json`. Conexión de base de datos vía `SUPABASE_DB_PASSWORD` en `.env` (plantilla en `.env.template`; `.env*` está en `.gitignore`).
 
 ## Comandos
 
@@ -34,10 +35,13 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 - Playwright: cualquier screenshot, snapshot, log o console output va a `.playwright-mcp/` (en `.gitignore`).
 - Context7: usar para traer documentación actualizada de librerías/frameworks (Next 16 rompe con versiones previas).
+- Supabase: herramientas `supabase_*` (SQL, migraciones, advisors, logs, Edge Functions, branches). Antes de operar, sigue las skills `supabase` y `supabase-postgres-best-practices`.
 
-## Spec Driven Development - Skill
-- /spec Usaremos esta habilidad para crear las especificaciones.
-- /spec-impl Usaremos esta skill para hacer las implementaciones.
+## Skills (`.agents/skills/`)
+
+- `spec` / `spec-impl`: flujo spec-driven. `/spec` escribe specs en `specs/NN-slug.md` (estado `Draft`→`Approved`, idioma = idioma del prompt); `/spec-impl` valida el estado, crea la rama `spec-NN-slug` y avanza la implementación por pasos con pausas para revisar diffs.
+- `supabase` (`.agents/skills/supabase/`): **cargar en cualquier tarea con Supabase** (Database, Auth, RLS, Edge Functions, Realtime, Storage, CLI/MCP, migraciones, debugging y logs). Incluye checklist de seguridad obligatorio (RLS en schemas expuestos, `auth.uid()` en vez de `user_metadata`, `TO authenticated` + predicado de ownership, no `SECURITY DEFINER` indiscriminado, no exponer `service_role`). Verifica contra changelog/docs actuales, no contra memoria.
+- `supabase-postgres-best-practices` (`.agents/skills/supabase-postgres-best-practices/`): **cargar antes de tocar cualquier cosa que viva en Postgres** (tablas/columnas, schemas, migraciones, RLS e índices, triggers, funciones, pg_cron/pgmq, pgvector, import/restore, y para diagnosticar queries lentas, locking o bloat). Reglas priorizadas en `references/`.
 
 ## Subagente
 
