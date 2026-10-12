@@ -16,6 +16,11 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - Alias de import: `@/*` → raíz del repo.
 - Backend: **Supabase** (Postgres, Auth, RLS, Edge Functions, Storage). Aún no hay dependencias `supabase-js`/`@supabase/ssr` en `package.json`. Conexión de base de datos vía `SUPABASE_DB_PASSWORD` en `.env` (plantilla en `.env.template`; `.env*` está en `.gitignore`).
 
+## Base de datos (regla obligatoria)
+
+- **Toda manipulación de la base de datos se hace SIEMPRE con migraciones.** Nunca apliques DDL (crear/alterar/borrar tablas, columnas, índices, políticas RLS, triggers, funciones, tipos, extensiones, etc.) con SQL suelto ni desde el dashboard. Usa `supabase_apply_migration` (o `supabase migration new` en local) para cada cambio, con nombre en `snake_case` y una migración por cambio.
+- El SQL ad-hoc (`supabase_execute_sql`) queda reservado para consultas **read-only** (lectura, diagnóstico, `EXPLAIN`). Cualquier escritura o cambio de esquema va dentro de una migración versionada.
+
 ## Comandos
 
 - `npm run dev` (puerto 3000) · `npm run lint` · `npm run build`.
