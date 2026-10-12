@@ -1,6 +1,6 @@
 # SPEC 05 — Esquema Inicial de Base de Datos (Supabase)
 
-> **Estado:** Aprobado
+> **Estado:** Implementado
 > **Depende de:** SPEC 01, SPEC 02, SPEC 03, SPEC 04
 > **Fecha:** 2026-10-12
 > **Objetivo:** Crear en el proyecto Supabase el esquema inicial de Postgres (perfiles con Auth, aulas, educadores, niños, salud/alergias, tutores, personas autorizadas y asistencia) como migraciones SQL versionadas y sembrarlo con los datos ficticios de SPEC 01–04.
