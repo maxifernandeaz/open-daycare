@@ -18,8 +18,9 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ## Base de datos (regla obligatoria)
 
-- **Toda manipulación de la base de datos se hace SIEMPRE con migraciones.** Nunca apliques DDL (crear/alterar/borrar tablas, columnas, índices, políticas RLS, triggers, funciones, tipos, extensiones, etc.) con SQL suelto ni desde el dashboard. Usa `supabase_apply_migration` (o `supabase migration new` en local) para cada cambio, con nombre en `snake_case` y una migración por cambio.
-- El SQL ad-hoc (`supabase_execute_sql`) queda reservado para consultas **read-only** (lectura, diagnóstico, `EXPLAIN`). Cualquier escritura o cambio de esquema va dentro de una migración versionada.
+- **Cada vez que se manipula la base de datos se hace SIEMPRE con migraciones, sin excepciones.** Esto aplica tanto a cambios de esquema (crear/alterar/borrar tablas, columnas, índices, políticas RLS, triggers, funciones, tipos, extensiones, etc.) como a cambios persistentes de datos (insert/update/delete de seed data, catálogos, correcciones, etc.). Nunca uses SQL suelto ni el dashboard.
+- Usa `supabase_apply_migration` (o `supabase migration new` en local) para cada cambio, con nombre en `snake_case` y una migración por cambio. Toda manipulación debe quedar versionada y reproducible.
+- El SQL ad-hoc (`supabase_execute_sql`) queda reservado exclusivamente para consultas **read-only** (lectura, diagnóstico, `EXPLAIN`). Cualquier escritura, DDL o cambio de datos va dentro de una migración versionada.
 
 ## Comandos
 
