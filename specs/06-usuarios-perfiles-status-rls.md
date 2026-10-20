@@ -209,21 +209,22 @@ revoke all on table public.profiles from anon;
 
 ## Acceptance criteria
 
-- [ ] La migración `profiles_user_status_and_rls` aparece en `supabase_list_migrations`.
-- [ ] El enum `user_status` existe con `pending` y `active` en ese orden.
-- [ ] `profiles` tiene `status user_status not null default 'active'`, `avatar_url text`, `notify_on_post boolean not null default true` y `daily_summary_enabled boolean not null default true`.
-- [ ] `select count(*) from public.profiles` = 11 y las 11 filas tienen `status = 'active'`.
-- [ ] `pg_get_functiondef('public.handle_new_user'::regproc)` contiene `'pending'::public.user_status` y no lee `status` desde `raw_user_meta_data`.
-- [ ] `profiles` tiene RLS habilitado y exactamente estas 4 policies, todas `to authenticated`: `profiles_select_authenticated`, `profiles_insert_managers`, `profiles_update_self_or_managers`, `profiles_delete_admin`.
-- [ ] `anon` no tiene privilegios de tabla sobre `public.profiles`.
-- [ ] `is_active_manager()` e `is_active_admin()` son `security definer`, tienen `search_path=''` y solo `authenticated` puede ejecutarlas.
-- [ ] Existe el trigger `profiles_prevent_self_privilege_escalation` (`before update`) y su función contiene la validación de `role`/`status`.
+- [x] La migración `profiles_user_status_and_rls` aparece en `supabase_list_migrations`.
+- [x] El enum `user_status` existe con `pending` y `active` en ese orden.
+- [x] `profiles` tiene `status user_status not null default 'active'`, `avatar_url text`, `notify_on_post boolean not null default true` y `daily_summary_enabled boolean not null default true`.
+- [x] `select count(*) from public.profiles` = 11 y las 11 filas tienen `status = 'active'`.
+- [x] `pg_get_functiondef('public.handle_new_user'::regproc)` contiene `'pending'::public.user_status` y no lee `status` desde `raw_user_meta_data`.
+- [x] `profiles` tiene RLS habilitado y exactamente estas 4 policies, todas `to authenticated`: `profiles_select_authenticated`, `profiles_insert_managers`, `profiles_update_self_or_managers`, `profiles_delete_admin`.
+- [x] `anon` no tiene privilegios de tabla sobre `public.profiles`.
+- [x] `is_active_manager()` e `is_active_admin()` son `security definer`, tienen `search_path=''` y solo `authenticated` puede ejecutarlas.
+- [x] Existe el trigger `profiles_prevent_self_privilege_escalation` (`before update`) y su función contiene la validación de `role`/`status`.
 - [ ] Con claim de tutor, `is_active_manager()` = `false`; con claim de director = `true`; con claim de admin, `is_active_admin()` = `true`.
-- [ ] `types/database.ts` incluye `user_status` y las 4 columnas nuevas; `npx tsc --noEmit` pasa.
-- [ ] `npm run lint` y `npm run build` pasan.
-- [ ] `get_advisors` no reporta ningún **ERROR**; los `WARN`/`INFO` se documentan.
-- [ ] `git status --short` solo muestra la migración nueva, `types/database.ts` y este spec; no hay cambios en `app/`, `data/`, `references/` ni en otros specs.
-- [ ] No se creó ningún usuario seed nuevo: el conteo de `profiles` sigue siendo 11.
+  - Tutor y director verificados empíricamente vía `request.jwt.claims` (read-only). El sub-test de `admin` queda sin verificar: no existe ningún perfil `role = 'admin'` en el seed de SPEC 05 (1 director, 3 educators, 7 tutors) y crear datos nuevos está fuera de alcance de este spec.
+- [x] `types/database.ts` incluye `user_status` y las 4 columnas nuevas; `npx tsc --noEmit` pasa.
+- [x] `npm run lint` y `npm run build` pasan.
+- [x] `get_advisors` no reporta ningún **ERROR**; los `WARN`/`INFO` se documentan.
+- [x] `git status --short` solo muestra la migración nueva, `types/database.ts` y este spec; no hay cambios en `app/`, `data/`, `references/` ni en otros specs.
+- [x] No se creó ningún usuario seed nuevo: el conteo de `profiles` sigue siendo 11.
 
 ## Decisions
 
