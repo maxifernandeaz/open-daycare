@@ -32,6 +32,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - `app/` es el único código de la app (hoy sigue siendo el boilerplate de create-next-app).
 - `references/pantallas/*.html` y `references/screenshots/` = mockups de diseño (HTML standalone con Tailwind CDN, Material 3, fuente Plus Jakarta Sans). Son la fuente de verdad del UI objetivo, NO parte del build.
 - Flujo spec-driven: las skills `/spec` y `/spec-impl` (`.agents/skills/`) escriben specs en `specs/NN-slug.md` (estado `Draft`→`Approved`, idioma = idioma del prompt) y `spec-impl` crea la rama `spec-NN-slug`.
+- **Specs de datos → `specs/database/`**: cualquier especificación que involucre datos (esquema, tablas, columnas, migraciones, seed data, RLS, triggers, funciones, etc.) se crea en `specs/database/NN-slug.md`, nunca suelta en `specs/`. Los specs de UI/app siguen en `specs/NN-slug.md`.
 
 ## Convenciones
 
@@ -45,7 +46,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ## Skills (`.agents/skills/`)
 
-- `spec` / `spec-impl`: flujo spec-driven. `/spec` escribe specs en `specs/NN-slug.md` (estado `Draft`→`Approved`, idioma = idioma del prompt); `/spec-impl` valida el estado, crea la rama `spec-NN-slug` y avanza la implementación por pasos con pausas para revisar diffs.
+- `spec` / `spec-impl`: flujo spec-driven. `/spec` escribe specs en `specs/NN-slug.md` (UI/app) o `specs/database/NN-slug.md` (datos/esquema/migraciones, estado `Draft`→`Approved`, idioma = idioma del prompt); `/spec-impl` valida el estado, crea la rama `spec-NN-slug` y avanza la implementación por pasos con pausas para revisar diffs.
 - `supabase` (`.agents/skills/supabase/`): **cargar en cualquier tarea con Supabase** (Database, Auth, RLS, Edge Functions, Realtime, Storage, CLI/MCP, migraciones, debugging y logs). Incluye checklist de seguridad obligatorio (RLS en schemas expuestos, `auth.uid()` en vez de `user_metadata`, `TO authenticated` + predicado de ownership, no `SECURITY DEFINER` indiscriminado, no exponer `service_role`). Verifica contra changelog/docs actuales, no contra memoria.
 - `supabase-postgres-best-practices` (`.agents/skills/supabase-postgres-best-practices/`): **cargar antes de tocar cualquier cosa que viva en Postgres** (tablas/columnas, schemas, migraciones, RLS e índices, triggers, funciones, pg_cron/pgmq, pgvector, import/restore, y para diagnosticar queries lentas, locking o bloat). Reglas priorizadas en `references/`.
 
