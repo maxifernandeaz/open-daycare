@@ -1,6 +1,6 @@
 # SPEC 06 — Tabla de Usuarios: `user_status`, Preferencias y Policies RLS
 
-> **Estado:** Borrador
+> **Estado:** aprobado
 > **Depende de:** SPEC 05
 > **Fecha:** 2026-10-19
 > **Objetivo:** Adaptar `public.profiles` como tabla de usuarios, añadiendo `user_status`, preferencias de notificación y policies RLS de lectura global y autoedición segura, sin renombrar la tabla ni crear `daycares`.
