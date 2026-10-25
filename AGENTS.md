@@ -14,7 +14,17 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - Next.js **16.3.5** (App Router) + React **19.2** + TypeScript strict. Confirma APIs contra `node_modules/next/dist/docs/` o Context7 antes de codificar.
 - Tailwind CSS **v4**: no hay `tailwind.config.*`; el theme vive en `app/globals.css` (`@import "tailwindcss"` + `@theme inline`). Dark mode vía `prefers-color-scheme` (CSS), no `.dark` class.
 - Alias de import: `@/*` → raíz del repo.
-- Backend: **Supabase** (Postgres, Auth, RLS, Edge Functions, Storage). Aún no hay dependencias `supabase-js`/`@supabase/ssr` en `package.json`. Conexión de base de datos vía `SUPABASE_DB_PASSWORD` en `.env` (plantilla en `.env.template`; `.env*` está en `.gitignore`).
+- Backend: **Supabase** (Postgres, Auth, RLS, Edge Functions, Storage). La app accede a la base de datos con los paquetes oficiales de Supabase para Next.js: `@supabase/supabase-js` + `@supabase/ssr` (versiones fijadas en `package.json`). Migraciones/CLI usan `SUPABASE_DB_PASSWORD` en `.env` (plantilla en `.env.template`; `.env*` está en `.gitignore`).
+
+## Supabase en la app (paquetes oficiales Next.js)
+
+- **Toda interacción con la base de datos desde la aplicación pasa por `@supabase/supabase-js` + `@supabase/ssr` y los helpers de `utils/supabase/`. No crear clientes ad-hoc ni conectar Postgres directo desde la app.**
+- Helpers disponibles:
+  - `utils/supabase/client.ts` → `createBrowserClient`, solo para Client Components/hooks.
+  - `utils/supabase/server.ts` → `createServerClient` con `await cookies()` (Next 16), para Server Components, Server Actions y Route Handlers.
+  - `utils/supabase/middleware.ts` → usado por el `proxy.ts` raíz (en Next 16 `middleware` está deprecado y se renombró a `proxy`); refresca la sesión con `supabase.auth.getUser()` y propaga las cookies.
+- Variables de entorno: `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (clave publishable, segura en el navegador). Nunca poner `service_role`/secret key en variables `NEXT_PUBLIC_*` ni en el cliente.
+- La autorización de filas se resuelve con **RLS** en Postgres, no en el cliente: asume que toda query desde la app corre con el rol `authenticated`/`anon` y sus políticas.
 
 ## Base de datos (regla obligatoria)
 
@@ -29,7 +39,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ## Estructura
 
-- `app/` es el único código de la app (hoy sigue siendo el boilerplate de create-next-app).
+- `app/` contiene las rutas y componentes; `utils/supabase/` contiene los clientes de Supabase; `proxy.ts` (raíz) refresca la sesión.
 - `references/pantallas/*.html` y `references/screenshots/` = mockups de diseño (HTML standalone con Tailwind CDN, Material 3, fuente Plus Jakarta Sans). Son la fuente de verdad del UI objetivo, NO parte del build.
 - Flujo spec-driven: las skills `/spec` y `/spec-impl` (`.agents/skills/`) escriben specs en `specs/NN-slug.md` (estado `Draft`→`Approved`, idioma = idioma del prompt) y `spec-impl` crea la rama `spec-NN-slug`.
 
