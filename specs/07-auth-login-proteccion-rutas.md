@@ -1,6 +1,6 @@
 # SPEC 07 — Login Real y Protección de Rutas
 
-> **Estado:** Aprobado
+> **Estado:** implementado
 > **Depende de:** SPEC 03, SPEC 05, SPEC 06
 > **Fecha:** 2026-10-25
 > **Objetivo:** Conectar `/login` a Supabase Auth con email y contraseña, exigir sesión verificada en todas las rutas salvo `/login` y `/activar-cuenta`, redirigir por rol (incluido staff en `/` → `/panel-aula`) y permitir cerrar sesión.
@@ -120,30 +120,30 @@ Sesión:
 
 ## Acceptance criteria
 
-- [ ] Sin sesión, `GET /`, `GET /panel-aula` y `GET /agregar-nino` responden con redirect a `/login`.
-- [ ] Sin sesión, `GET /login` y `GET /activar-cuenta` responden 200.
-- [ ] Los 11 usuarios seed tienen `confirmation_token`, `recovery_token`, `email_change` y `email_change_token_new` en `''` (no `NULL`) y exactamente una identity `email` cada uno.
-- [ ] Con `elena.morales@kiddicare.test` / `kiddicare` el login redirige a `/panel-aula`.
-- [ ] Con `lucia.fernandez@gmail.com` / `kiddicare` el login redirige a `/`.
-- [ ] Tras el login existe la cookie `sb-<ref>-auth-token` con `HttpOnly`, `SameSite=Lax` y `Path=/`.
-- [ ] La cookie escrita por el Server Action de login (no solo por el proxy) lleva `HttpOnly`, `SameSite=Lax`, `Path=/` y, en producción, `Secure`, usando `AUTH_COOKIE_OPTIONS` compartido.
-- [ ] Recargar `/panel-aula` después del login mantiene la sesión y no redirige a `/login`.
-- [ ] Un `tutor` autenticado que abre `/panel-aula` o `/agregar-nino` termina en `/`.
-- [ ] Un `educator`, `director` o `admin` autenticado abre `/panel-aula` sin redirect.
-- [ ] Un `educator`, `director` o `admin` autenticado que abre `/` termina en `/panel-aula`; un `tutor` autenticado ve el Portal Familias en `/`.
-- [ ] Con contraseña incorrecta se queda en `/login`, se muestra "Email o contraseña incorrectos." y no queda cookie de sesión.
-- [ ] La URL tras un intento fallido no contiene la contraseña ni parámetros de credenciales.
-- [ ] `app/login/actions.ts` consulta `profiles.status` y, si no es `active`, ejecuta `signOut({ scope: "local" })` y devuelve "Tu cuenta está pendiente de activación." (verificable por `archivo:línea`).
-- [ ] `proxy.ts` usa `getClaims()` y no `getSession()` para decidir la protección.
-- [ ] Todo redirect de `proxy.ts` copia `cookiesToSet` y los headers `cache-control`, `expires` y `pragma` del response de Supabase.
-- [ ] Un usuario autenticado que abre `/login` es redirigido a `/`.
-- [ ] "Cerrar sesión" desde `/panel-aula` y desde `/` lleva a `/login`, borra la cookie de sesión y luego `/` vuelve a redirigir a `/login`.
-- [ ] El error de login se anuncia con `role="alert"` y el botón muestra un estado deshabilitado mientras la Server Action está pendiente.
-- [ ] Ningún archivo usa `service_role`, secret key ni expone tokens en `NEXT_PUBLIC_*`.
-- [ ] `npm run lint`, `npx tsc --noEmit` y `npm run build` pasan sin errores.
-- [ ] La consola del navegador queda limpia en `/login`, `/`, `/panel-aula` y `/agregar-nino`.
+- [x] Sin sesión, `GET /`, `GET /panel-aula` y `GET /agregar-nino` responden con redirect a `/login`.
+- [x] Sin sesión, `GET /login` y `GET /activar-cuenta` responden 200.
+- [x] Los 11 usuarios seed tienen `confirmation_token`, `recovery_token`, `email_change` y `email_change_token_new` en `''` (no `NULL`) y exactamente una identity `email` cada uno.
+- [x] Con `elena.morales@kiddicare.test` / `kiddicare` el login redirige a `/panel-aula`.
+- [x] Con `lucia.fernandez@gmail.com` / `kiddicare` el login redirige a `/`.
+- [x] Tras el login existe la cookie `sb-<ref>-auth-token` con `HttpOnly`, `SameSite=Lax` y `Path=/`.
+- [x] La cookie escrita por el Server Action de login (no solo por el proxy) lleva `HttpOnly`, `SameSite=Lax`, `Path=/` y, en producción, `Secure`, usando `AUTH_COOKIE_OPTIONS` compartido.
+- [x] Recargar `/panel-aula` después del login mantiene la sesión y no redirige a `/login`.
+- [x] Un `tutor` autenticado que abre `/panel-aula` o `/agregar-nino` termina en `/`.
+- [x] Un `educator`, `director` o `admin` autenticado abre `/panel-aula` sin redirect.
+- [x] Un `educator`, `director` o `admin` autenticado que abre `/` termina en `/panel-aula`; un `tutor` autenticado ve el Portal Familias en `/`.
+- [x] Con contraseña incorrecta se queda en `/login`, se muestra "Email o contraseña incorrectos." y no queda cookie de sesión.
+- [x] La URL tras un intento fallido no contiene la contraseña ni parámetros de credenciales.
+- [x] `app/login/actions.ts` consulta `profiles.status` y, si no es `active`, ejecuta `signOut({ scope: "local" })` y devuelve "Tu cuenta está pendiente de activación." (verificable por `archivo:línea`).
+- [x] `proxy.ts` usa `getClaims()` y no `getSession()` para decidir la protección.
+- [x] Todo redirect de `proxy.ts` copia `cookiesToSet` y los headers `cache-control`, `expires` y `pragma` del response de Supabase.
+- [x] Un usuario autenticado que abre `/login` es redirigido a `/`.
+- [x] "Cerrar sesión" desde `/panel-aula` y desde `/` lleva a `/login`, borra la cookie de sesión y luego `/` vuelve a redirigir a `/login`.
+- [x] El error de login se anuncia con `role="alert"` y el botón muestra un estado deshabilitado mientras la Server Action está pendiente.
+- [x] Ningún archivo usa `service_role`, secret key ni expone tokens en `NEXT_PUBLIC_*`.
+- [x] `npm run lint`, `npx tsc --noEmit` y `npm run build` pasan sin errores.
+- [x] La consola del navegador queda limpia en `/login`, `/`, `/panel-aula` y `/agregar-nino`.
 - [ ] A 375px no hay scroll horizontal en `/login`, `/`, `/panel-aula` ni `/agregar-nino`, y el logout es visible y accesible.
-- [ ] `git diff --name-only` solo muestra los archivos listados en el Scope más este spec; `app/activar-cuenta/page.tsx` y sus datos no cambian.
+- [x] `git diff --name-only` solo muestra los archivos listados en el Scope más este spec; `app/activar-cuenta/page.tsx` y sus datos no cambian.
 
 ## Decisions
 
