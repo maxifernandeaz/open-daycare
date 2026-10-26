@@ -1,4 +1,5 @@
 import Icon from "@/app/components/Icons";
+import LogoutButton from "@/app/components/auth/LogoutButton";
 import FallbackImage from "./FallbackImage";
 import { HEADER_HEIGHT_CLASS, SIDEBAR_LEFT_CLASS } from "./shell";
 import { classroomShell } from "@/data/mock-classroom";
@@ -108,6 +109,8 @@ export default function AppHeader() {
               </span>
             </div>
           </div>
+
+          <LogoutButton variant="icon" />
         </div>
       </div>
     </header>
