@@ -169,14 +169,16 @@ export async function createChild(
   });
 
   if (error || !childId) {
-    if (error?.message.includes("aula no existe")) {
+    const rpcErrorMessage = error?.message.toLowerCase() ?? "";
+
+    if (rpcErrorMessage.includes("aula no existe")) {
       return {
         status: "error",
         fieldErrors: { classroom_id: "Selecciona una sala válida." },
       };
     }
 
-    if (error?.message.includes("Código de alergia")) {
+    if (rpcErrorMessage.includes("código de alergia")) {
       return {
         status: "error",
         fieldErrors: { allergies: "Selecciona alergias válidas." },
