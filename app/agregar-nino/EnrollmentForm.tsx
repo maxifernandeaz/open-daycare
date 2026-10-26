@@ -1,7 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
-import type { ReactNode } from "react";
+import { useActionState, useState } from "react";
+import type { FormEvent, ReactNode } from "react";
 import { createChild, type ChildFormState } from "@/app/agregar-nino/actions";
 import StickyActionBar from "@/app/components/agregar-nino/StickyActionBar";
 import Icon from "@/app/components/Icons";
@@ -14,26 +14,86 @@ const SUCCESS_BANNER_CLASSES =
 const ERROR_BANNER_CLASSES =
   "mb-6 rounded-2xl border border-error/30 bg-error-container px-4 py-4 text-on-error-container";
 
+const AGE_WARNING_CLASSES =
+  "mb-6 rounded-2xl border border-tertiary/30 bg-tertiary-fixed px-4 py-3 flex items-start gap-3 text-on-tertiary-fixed";
+
+export type ClassroomAgeRange = {
+  id: string;
+  name: string;
+  ageMinMonths: number;
+  ageMaxMonths: number;
+};
+
+function getAgeInMonths(birthDate: string, today = new Date()): number | null {
+  const [year, month, day] = birthDate.split("-").map(Number);
+  if (!year || !month || !day) return null;
+
+  let months =
+    (today.getFullYear() - year) * 12 + (today.getMonth() + 1 - month);
+
+  if (today.getDate() < day) months -= 1;
+
+  return months;
+}
+
+function getAgeWarning(
+  formData: FormData,
+  classroomAgeRanges: ClassroomAgeRange[],
+): string | null {
+  const birthDate = String(formData.get("birth_date") ?? "");
+  const classroomId = String(formData.get("classroom_id") ?? "");
+  const ageInMonths = getAgeInMonths(birthDate);
+  const classroom = classroomAgeRanges.find((range) => range.id === classroomId);
+
+  if (ageInMonths === null || !classroom) return null;
+
+  if (
+    ageInMonths >= classroom.ageMinMonths &&
+    ageInMonths <= classroom.ageMaxMonths
+  ) {
+    return null;
+  }
+
+  return `La edad calculada (${ageInMonths} meses) está fuera del rango sugerido para ${classroom.name} (${classroom.ageMinMonths}–${classroom.ageMaxMonths} meses). Puedes guardar la ficha igualmente.`;
+}
+
 type EnrollmentFormProps = {
   header: ReactNode;
   children: ReactNode;
+  classroomAgeRanges: ClassroomAgeRange[];
 };
 
 export default function EnrollmentForm({
   header,
   children,
+  classroomAgeRanges,
 }: EnrollmentFormProps) {
   const [state, formAction] = useActionState(createChild, INITIAL_STATE);
+  const [warningState, setWarningState] = useState<{
+    formKey: string;
+    message: string | null;
+  }>({ formKey: "initial", message: null });
   const fieldErrorMessages = Object.values(state.fieldErrors ?? {}).filter(
     (message): message is string => Boolean(message),
   );
-  const resetKey = state.status === "success" ? state.childId : "initial";
+  const resetKey =
+    state.status === "success" ? (state.childId ?? "success") : "initial";
+  const ageWarning =
+    warningState.formKey === resetKey ? warningState.message : null;
+
+  const handleFormChange = (event: FormEvent<HTMLFormElement>) => {
+    setWarningState({
+      formKey: resetKey,
+      message: getAgeWarning(new FormData(event.currentTarget), classroomAgeRanges),
+    });
+  };
 
   return (
     <form
       action={formAction}
       className="w-full"
       id="childEnrollmentForm"
+      onChange={handleFormChange}
     >
       {header}
 
@@ -73,6 +133,13 @@ export default function EnrollmentForm({
               ))}
             </ul>
           ) : null}
+        </div>
+      ) : null}
+
+      {ageWarning ? (
+        <div className={AGE_WARNING_CLASSES} role="status">
+          <Icon className="text-tertiary" name="warning" size={20} />
+          <p className="font-body-sm text-body-sm">{ageWarning}</p>
         </div>
       ) : null}
 

@@ -36,6 +36,12 @@ export default async function AgregarNinoPage() {
         <div className="flex flex-col w-full pb-28">
           <div className="relative w-full max-w-7xl mx-auto pt-6 px-4">
             <EnrollmentForm
+              classroomAgeRanges={classrooms.map((classroom) => ({
+                id: classroom.id,
+                name: classroom.name,
+                ageMinMonths: classroom.ageMinMonths,
+                ageMaxMonths: classroom.ageMaxMonths,
+              }))}
               header={
                 <>
                   <PageHeader />
