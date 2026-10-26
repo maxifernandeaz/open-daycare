@@ -12,6 +12,7 @@ import {
   SIDEBAR_OFFSET_CLASS,
 } from "@/app/components/panel-aula/shell";
 import { requireStaff } from "@/utils/auth";
+import { getEnrollmentCatalogs } from "./catalogs";
 
 export const metadata: Metadata = {
   title: "KiddiCare · Agregar Nuevo Niño",
@@ -21,6 +22,9 @@ export const metadata: Metadata = {
 
 export default async function AgregarNinoPage() {
   await requireStaff();
+
+  const { classrooms, educators, allergies, error: catalogError } =
+    await getEnrollmentCatalogs();
 
   return (
     <>
@@ -32,16 +36,24 @@ export default async function AgregarNinoPage() {
         <div className="flex flex-col w-full pb-28">
           <div className="relative w-full max-w-7xl mx-auto pt-6 px-4">
             <PageHeader />
+            {catalogError ? (
+              <p
+                className="mb-6 rounded-xl bg-error-container px-4 py-3 font-body-sm text-body-sm text-error"
+                role="alert"
+              >
+                {catalogError}
+              </p>
+            ) : null}
             <form
               className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start"
               id="childEnrollmentForm"
             >
               <div className="lg:col-span-7 xl:col-span-8 flex flex-col gap-8">
                 <IdentitySection />
-                <ClassroomSection />
+                <ClassroomSection classrooms={classrooms} educators={educators} />
               </div>
               <div className="lg:col-span-5 xl:col-span-4 flex flex-col gap-8">
-                <HealthSection />
+                <HealthSection allergies={allergies} />
                 <SpecialCareSection />
               </div>
             </form>

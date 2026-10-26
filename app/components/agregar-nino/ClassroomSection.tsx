@@ -1,26 +1,33 @@
 import Icon from "@/app/components/Icons";
-import { enrollmentScreen } from "@/data/mock-enrollment";
-import type { ClassroomCard } from "@/data/mock-enrollment";
+import type { ClassroomOption, EducatorOption } from "@/app/agregar-nino/catalogs";
+import { classroomVisuals, enrollmentScreen } from "@/data/mock-enrollment";
+import type { Tone } from "@/data/mock-classroom";
 import FormSection from "./FormSection";
 
 const SELECT_CLASSES =
   "w-full pl-11 pr-8 py-3 bg-surface-container-lowest rounded-xl font-body-md text-body-md text-on-surface focus:outline-none shadow-sm cursor-pointer appearance-none";
 
-function vacancyDotClass(room: ClassroomCard) {
-  if (room.recommended) return "w-2 h-2 rounded-full bg-primary animate-pulse";
-  return room.vacancy.tone === "tertiary"
+type ClassroomSectionProps = {
+  classrooms: ClassroomOption[];
+  educators: EducatorOption[];
+};
+
+function vacancyDotClass(recommended: boolean, tone: Tone) {
+  if (recommended) return "w-2 h-2 rounded-full bg-primary animate-pulse";
+  return tone === "tertiary"
     ? "w-2 h-2 rounded-full bg-tertiary-container"
     : "w-2 h-2 rounded-full bg-primary-container";
 }
 
-function vacancyTextClass(room: ClassroomCard) {
-  return room.recommended
+function vacancyTextClass(recommended: boolean) {
+  return recommended
     ? "text-primary font-label-sm text-label-sm font-bold"
     : "text-on-surface-variant font-label-sm text-label-sm";
 }
 
-function ClassroomCardTile({ room }: { room: ClassroomCard }) {
-  const recommended = Boolean(room.recommended);
+function ClassroomCardTile({ room }: { room: ClassroomOption }) {
+  const recommended = room.recommended;
+  const vacancyTone = classroomVisuals[room.slug]?.vacancy.tone ?? "primary";
   const surfaceClass = recommended
     ? "bg-primary-fixed/20 peer-checked:bg-primary-fixed/40"
     : "bg-surface-container-low peer-checked:bg-secondary-fixed/50";
@@ -52,29 +59,39 @@ function ClassroomCardTile({ room }: { room: ClassroomCard }) {
             </span>
           ) : (
             <span className="font-label-sm text-label-sm text-on-surface-variant">
-              {room.range}
+              {room.ageRange}
             </span>
           )}
         </div>
         <h3 className={`font-title-md text-title-md ${titleClass}`}>{room.name}</h3>
-        <span className={`font-label-sm text-label-sm ${taglineClass}`}>{room.tagline}</span>
-        <p className="font-body-sm text-body-sm text-on-surface-variant mt-2 mb-3">
-          {room.description}
-        </p>
-        <div
-          className={`mt-auto pt-2 flex items-center gap-1.5 ${vacancyTextClass(room)}`}
-        >
-          <span className={vacancyDotClass(room)} />
-          <span>{room.vacancy.text}</span>
-        </div>
+        {room.tagline ? (
+          <span className={`font-label-sm text-label-sm ${taglineClass}`}>
+            {room.tagline}
+          </span>
+        ) : null}
+        {room.description ? (
+          <p className="font-body-sm text-body-sm text-on-surface-variant mt-2 mb-3">
+            {room.description}
+          </p>
+        ) : null}
+        {room.vacancyText ? (
+          <div
+            className={`mt-auto pt-2 flex items-center gap-1.5 ${vacancyTextClass(recommended)}`}
+          >
+            <span className={vacancyDotClass(recommended, vacancyTone)} />
+            <span>{room.vacancyText}</span>
+          </div>
+        ) : null}
       </div>
     </label>
   );
 }
 
-export default function ClassroomSection() {
-  const { classroomSection, classrooms, teachers, schedules, defaults } =
-    enrollmentScreen;
+export default function ClassroomSection({
+  classrooms,
+  educators,
+}: ClassroomSectionProps) {
+  const { classroomSection, schedules, defaults } = enrollmentScreen;
 
   return (
     <FormSection
@@ -110,9 +127,9 @@ export default function ClassroomSection() {
               defaultValue={defaults.teacher}
               id="assigned-teacher"
             >
-              {teachers.map((teacher) => (
-                <option key={teacher.value} value={teacher.value}>
-                  {teacher.label}
+              {educators.map((educator) => (
+                <option key={educator.id} value={educator.id}>
+                  {educator.label}
                 </option>
               ))}
             </select>

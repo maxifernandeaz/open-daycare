@@ -1,10 +1,19 @@
 import Icon from "@/app/components/Icons";
+import type { AllergyOption } from "@/app/agregar-nino/catalogs";
 import { enrollmentScreen } from "@/data/mock-enrollment";
 import AllergyChips from "./AllergyChips";
 import FormSection from "./FormSection";
 
-export default function HealthSection() {
-  const { health, allergyChips, addAllergyChip, defaults } = enrollmentScreen;
+type HealthSectionProps = {
+  allergies: AllergyOption[];
+};
+
+export default function HealthSection({ allergies }: HealthSectionProps) {
+  const { health, addAllergyChip, defaults } = enrollmentScreen;
+  const allergyChips = allergies.map((allergy) => ({
+    id: allergy.code,
+    label: allergy.label,
+  }));
 
   return (
     <FormSection

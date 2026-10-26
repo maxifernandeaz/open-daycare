@@ -1,14 +1,8 @@
 import type { Educator, Tone } from "./mock-classroom";
 
-export type ClassroomCard = {
-  id: "cunas" | "soles" | "estrellitas";
+export type ClassroomVisual = {
   icon: string;
-  range: string;
-  name: string;
-  tagline: string;
-  description: string;
   vacancy: { text: string; tone: Tone };
-  recommended?: boolean;
 };
 
 export type SelectOption = { value: string; label: string };
@@ -27,10 +21,7 @@ export type EnrollmentScreen = {
     pickIllustration: string;
     takePhoto: string;
   };
-  classrooms: ClassroomCard[];
-  teachers: SelectOption[];
   schedules: SelectOption[];
-  allergyChips: Chip[];
   addAllergyChip: string;
   defaults: {
     birthDate: string;
@@ -95,6 +86,21 @@ export type EnrollmentScreen = {
 const avatarPhoto =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuC2wK4CtxTDh4Ku9R3KIzsASsIUdDvZqfktpKsk791AXDH8UkCuyRXZGwugD7ib2TmMKwXjg1IdKs2W2vLHQNbUaA6jGyUHXLIdOnW_9H83hYeggQDQa320BevM3DwI6d_r2W5Rn1HGy2tiq-MmOQDew4zVPCM3j6lorPmWo-TXj4yJjdaJxUe-IHIuqOzw1C7iH54czCvCx6Z6gkW4xooBy4MkKxCXQqek_OydYOzwG237_zMtBMGP";
 
+export const classroomVisuals: Record<string, ClassroomVisual> = {
+  cunas: {
+    icon: "crib",
+    vacancy: { text: "3 vacantes libres", tone: "primary" },
+  },
+  soles: {
+    icon: "sunny",
+    vacancy: { text: "5 vacantes libres • Ratio óptimo", tone: "primary" },
+  },
+  estrellitas: {
+    icon: "auto_stories",
+    vacancy: { text: "1 vacante restante", tone: "tertiary" },
+  },
+};
+
 export const enrollmentScreen: EnrollmentScreen = {
   breadcrumb: [
     { label: "Panel de Aula (Hoy)", href: "#", icon: "home" },
@@ -118,57 +124,11 @@ export const enrollmentScreen: EnrollmentScreen = {
     pickIllustration: "Elegir ilustración suave",
     takePhoto: "Tomar foto con cámara del centro",
   },
-  classrooms: [
-    {
-      id: "cunas",
-      icon: "crib",
-      range: "0 - 1 año",
-      name: "Sala Cunas",
-      tagline: "Lactantes",
-      description:
-        "Estimulación temprana, biberones a demanda y ritmos de sueño individuales.",
-      vacancy: { text: "3 vacantes libres", tone: "primary" },
-    },
-    {
-      id: "soles",
-      icon: "sunny",
-      range: "1 - 2 años",
-      name: "Sala Soles",
-      tagline: "Caminadores (1 a 2 años)",
-      description:
-        "Primeros pasos autónomos, juego heurístico y lenguaje guiado.",
-      vacancy: { text: "5 vacantes libres • Ratio óptimo", tone: "primary" },
-      recommended: true,
-    },
-    {
-      id: "estrellitas",
-      icon: "auto_stories",
-      range: "2 - 3 años",
-      name: "Sala Estrellitas",
-      tagline: "Exploradores",
-      description:
-        "Control gradual de esfínteres, asambleas de diálogo y psicomotricidad.",
-      vacancy: { text: "1 vacante restante", tone: "tertiary" },
-    },
-  ],
-  teachers: [
-    { value: "camila", label: "Camila Rivas (Especialista en Caminadores 1-2)" },
-    { value: "sofia", label: "Sofía Navarro (Psicopedagoga Infantil)" },
-    { value: "elena", label: "Elena Morales (Directora / Apoyo Pedagógico)" },
-  ],
   schedules: [
     { value: "completa", label: "Jornada Completa con Almuerzo y Siesta (8:30 - 16:30)" },
     { value: "manana", label: "Solo Mañanas con Comedor (8:30 - 13:30)" },
     { value: "matinal", label: "Mañanas sin Comedor (9:00 - 12:30)" },
     { value: "tarde", label: "Jornada Vespertina / Taller (14:30 - 18:00)" },
-  ],
-  allergyChips: [
-    { id: "none", label: "Sin alergias conocidas" },
-    { id: "aplv", label: "APLV (Proteína leche vaca)" },
-    { id: "gluten", label: "Gluten / Celíaco" },
-    { id: "nuts", label: "Frutos secos" },
-    { id: "egg", label: "Huevo" },
-    { id: "fish", label: "Pescado" },
   ],
   addAllergyChip: "Otra alergia específica",
   defaults: {
