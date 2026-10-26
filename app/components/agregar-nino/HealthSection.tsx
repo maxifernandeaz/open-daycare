@@ -1,10 +1,15 @@
 import Icon from "@/app/components/Icons";
+import type { AllergyOption } from "@/app/agregar-nino/catalogs";
 import { enrollmentScreen } from "@/data/mock-enrollment";
 import AllergyChips from "./AllergyChips";
 import FormSection from "./FormSection";
 
-export default function HealthSection() {
-  const { health, allergyChips, addAllergyChip, defaults } = enrollmentScreen;
+type HealthSectionProps = {
+  allergies: AllergyOption[];
+};
+
+export default function HealthSection({ allergies }: HealthSectionProps) {
+  const { health, addAllergyChip, defaults } = enrollmentScreen;
 
   return (
     <FormSection
@@ -24,7 +29,7 @@ export default function HealthSection() {
         <label className="block font-label-md text-label-md text-on-surface">
           {health.chipsLabel}
         </label>
-        <AllergyChips addLabel={addAllergyChip} chips={allergyChips} />
+        <AllergyChips addLabel={addAllergyChip} allergies={allergies} />
       </div>
 
       <div className="mb-5">
@@ -37,6 +42,7 @@ export default function HealthSection() {
         <textarea
           className="w-full p-3.5 bg-surface-container-lowest rounded-xl font-body-sm text-body-sm text-on-surface placeholder:text-outline focus:outline-none shadow-sm transition-all"
           id="allergy-details"
+          name="allergy_notes"
           placeholder={health.detailsPlaceholder}
           rows={3}
         />
@@ -48,6 +54,7 @@ export default function HealthSection() {
             className="w-5 h-5 rounded-lg bg-surface cursor-pointer accent-error"
             defaultChecked={defaults.urgentMedicalFlag}
             id="urgent-medical-flag"
+            name="urgent_medical_flag"
             type="checkbox"
           />
         </div>

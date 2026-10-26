@@ -27,6 +27,7 @@ export default function SpecialCareSection() {
             <input
               className={TEXT_INPUT_CLASSES}
               id="pediatrician-name"
+              name="pediatrician_name"
               placeholder={specialCare.pediatricianPlaceholder}
               type="text"
             />
@@ -41,6 +42,7 @@ export default function SpecialCareSection() {
             <input
               className={TEXT_INPUT_CLASSES}
               id="pediatrician-phone"
+              name="pediatrician_phone"
               placeholder={specialCare.phonePlaceholder}
               type="tel"
             />
@@ -57,6 +59,7 @@ export default function SpecialCareSection() {
           <textarea
             className="w-full p-3.5 bg-surface rounded-xl font-body-sm text-body-sm text-on-surface placeholder:text-outline focus:bg-surface-container-lowest focus:outline-none shadow-sm transition-all"
             id="care-notes"
+            name="nap_notes"
             placeholder={specialCare.careNotesPlaceholder}
             rows={3}
           />
@@ -68,6 +71,7 @@ export default function SpecialCareSection() {
               className="w-4 h-4 rounded-md bg-surface-container-lowest cursor-pointer accent-primary"
               defaultChecked={defaults.medicationConsent}
               id="medication-consent"
+              name="medication_consent"
               type="checkbox"
             />
           </div>

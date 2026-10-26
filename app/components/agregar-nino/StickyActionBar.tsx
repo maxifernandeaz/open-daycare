@@ -1,6 +1,7 @@
 import Icon from "@/app/components/Icons";
 import { SIDEBAR_LEFT_CLASS } from "@/app/components/panel-aula/shell";
 import { enrollmentScreen } from "@/data/mock-enrollment";
+import SubmitButton from "./SubmitButton";
 
 export default function StickyActionBar() {
   const { stickyBar } = enrollmentScreen;
@@ -15,19 +16,18 @@ export default function StickyActionBar() {
           <span className="font-body-sm text-body-sm">{stickyBar.privacy}</span>
         </div>
         <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
-          <button
+          <a
             className="px-5 py-2.5 rounded-xl font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container-low transition-colors"
-            type="button"
+            href="/panel-aula"
           >
             {stickyBar.cancel}
-          </button>
-          <button
+          </a>
+          <SubmitButton
             className="inline-flex items-center justify-center gap-2 px-7 py-3 rounded-xl bg-primary text-on-primary font-label-lg text-label-lg shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
-            type="button"
-          >
-            <Icon name="how_to_reg" size={20} />
-            <span>{stickyBar.submit}</span>
-          </button>
+            icon="how_to_reg"
+            label={stickyBar.submit}
+            pendingLabel={stickyBar.submitPending}
+          />
         </div>
       </div>
     </aside>

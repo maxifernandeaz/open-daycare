@@ -461,8 +461,29 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_child: {
+        Args: {
+          p_allergy_codes: string[]
+          p_allergy_notes: string
+          p_birth_date: string
+          p_classroom_id: string
+          p_document: string
+          p_full_name: string
+          p_gender: Database["public"]["Enums"]["gender"]
+          p_medication_consent: boolean
+          p_nap_notes: string
+          p_nickname: string
+          p_pediatrician_name: string
+          p_pediatrician_phone: string
+          p_primary_educator_id: string
+          p_schedule: Database["public"]["Enums"]["schedule"]
+          p_urgent_medical_flag: boolean
+        }
+        Returns: string
+      }
       is_active_admin: { Args: never; Returns: boolean }
       is_active_manager: { Args: never; Returns: boolean }
+      is_active_staff: { Args: never; Returns: boolean }
     }
     Enums: {
       gender: "boy" | "girl" | "other"

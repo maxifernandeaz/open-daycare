@@ -2,9 +2,7 @@
 
 import { useState } from "react";
 import Icon from "@/app/components/Icons";
-import type { Chip } from "@/data/mock-enrollment";
-
-const NO_ALLERGY_ID = "none";
+import type { AllergyOption } from "@/app/agregar-nino/catalogs";
 
 const CHIP_CLASSES =
   "px-3 py-1.5 rounded-full font-label-sm text-label-sm shadow-sm flex items-center gap-1 transition-colors";
@@ -19,34 +17,34 @@ const ADD_CHIP_CLASSES =
   "px-3 py-1.5 rounded-full font-label-sm text-label-sm shadow-sm flex items-center gap-1 transition-colors bg-surface-container-high text-primary hover:bg-primary hover:text-on-primary";
 
 type AllergyChipsProps = {
-  chips: Chip[];
+  allergies: AllergyOption[];
   addLabel: string;
-  defaultSelectedId?: string;
 };
 
-export default function AllergyChips({
-  chips,
-  addLabel,
-  defaultSelectedId = NO_ALLERGY_ID,
-}: AllergyChipsProps) {
-  const [selectedIds, setSelectedIds] = useState<string[]>([defaultSelectedId]);
+export default function AllergyChips({ allergies, addLabel }: AllergyChipsProps) {
+  const noneCode = allergies.find((allergy) => allergy.isNone)?.code;
+  const [selectedCodes, setSelectedCodes] = useState<string[]>(
+    noneCode ? [noneCode] : [],
+  );
 
-  const toggleChip = (chipId: string) => {
-    setSelectedIds((current) => {
-      if (chipId === NO_ALLERGY_ID) return [NO_ALLERGY_ID];
+  const toggleChip = (code: string) => {
+    setSelectedCodes((current) => {
+      if (code === noneCode) return noneCode ? [noneCode] : [];
 
-      const selectedSpecific = current.filter((id) => id !== NO_ALLERGY_ID);
-      return selectedSpecific.includes(chipId)
-        ? selectedSpecific.filter((id) => id !== chipId)
-        : [...selectedSpecific, chipId];
+      const selectedSpecific = current.filter((id) => id !== noneCode);
+      return selectedSpecific.includes(code)
+        ? selectedSpecific.filter((id) => id !== code)
+        : [...selectedSpecific, code];
     });
   };
 
   return (
     <div className="flex flex-wrap gap-2 pt-1">
-      {chips.map((chip) => {
-        const isSelected = selectedIds.includes(chip.id);
-        const isNoAllergy = chip.id === NO_ALLERGY_ID;
+      <input name="allergy_codes" type="hidden" value={selectedCodes.join(",")} />
+
+      {allergies.map((allergy) => {
+        const isSelected = selectedCodes.includes(allergy.code);
+        const isNoAllergy = allergy.isNone;
 
         const className = isSelected
           ? `${CHIP_CLASSES} ${
@@ -60,14 +58,14 @@ export default function AllergyChips({
           <button
             aria-pressed={isSelected}
             className={className}
-            key={chip.id}
-            onClick={() => toggleChip(chip.id)}
+            key={allergy.code}
+            onClick={() => toggleChip(allergy.code)}
             type="button"
           >
             {isNoAllergy ? (
               <Icon className="text-primary" name="check_circle" size={14} />
             ) : null}
-            <span>{chip.label}</span>
+            <span>{allergy.label}</span>
           </button>
         );
       })}
