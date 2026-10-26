@@ -1,6 +1,6 @@
 # SPEC 08 — Agregar Niño · Persistencia Real en Supabase
 
-> **Estado:** Borrador
+> **Estado:** aprobado
 > **Depende de:** SPEC 04, SPEC 05, SPEC 06, SPEC 07
 > **Fecha:** 2026-10-26
 > **Objetivo:** Conectar `/agregar-nino` a Supabase para leer catálogos reales (salas, alergias y staff), validar en servidor y crear atómicamente `children`, `child_health` y `child_allergies` con RLS para staff, sin tocar `/panel-aula`.
