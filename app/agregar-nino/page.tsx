@@ -4,7 +4,6 @@ import HealthSection from "@/app/components/agregar-nino/HealthSection";
 import IdentitySection from "@/app/components/agregar-nino/IdentitySection";
 import PageHeader from "@/app/components/agregar-nino/PageHeader";
 import SpecialCareSection from "@/app/components/agregar-nino/SpecialCareSection";
-import StickyActionBar from "@/app/components/agregar-nino/StickyActionBar";
 import AppHeader from "@/app/components/panel-aula/AppHeader";
 import AppSidebar from "@/app/components/panel-aula/AppSidebar";
 import {
@@ -13,6 +12,7 @@ import {
 } from "@/app/components/panel-aula/shell";
 import { requireStaff } from "@/utils/auth";
 import { getEnrollmentCatalogs } from "./catalogs";
+import EnrollmentForm from "./EnrollmentForm";
 
 export const metadata: Metadata = {
   title: "KiddiCare · Agregar Nuevo Niño",
@@ -35,32 +35,35 @@ export default async function AgregarNinoPage() {
       >
         <div className="flex flex-col w-full pb-28">
           <div className="relative w-full max-w-7xl mx-auto pt-6 px-4">
-            <PageHeader />
-            {catalogError ? (
-              <p
-                className="mb-6 rounded-xl bg-error-container px-4 py-3 font-body-sm text-body-sm text-error"
-                role="alert"
-              >
-                {catalogError}
-              </p>
-            ) : null}
-            <form
-              className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start"
-              id="childEnrollmentForm"
+            <EnrollmentForm
+              header={
+                <>
+                  <PageHeader />
+                  {catalogError ? (
+                    <p
+                      className="mb-6 rounded-xl bg-error-container px-4 py-3 font-body-sm text-body-sm text-error"
+                      role="alert"
+                    >
+                      {catalogError}
+                    </p>
+                  ) : null}
+                </>
+              }
             >
-              <div className="lg:col-span-7 xl:col-span-8 flex flex-col gap-8">
-                <IdentitySection />
-                <ClassroomSection classrooms={classrooms} educators={educators} />
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                <div className="lg:col-span-7 xl:col-span-8 flex flex-col gap-8">
+                  <IdentitySection />
+                  <ClassroomSection classrooms={classrooms} educators={educators} />
+                </div>
+                <div className="lg:col-span-5 xl:col-span-4 flex flex-col gap-8">
+                  <HealthSection allergies={allergies} />
+                  <SpecialCareSection />
+                </div>
               </div>
-              <div className="lg:col-span-5 xl:col-span-4 flex flex-col gap-8">
-                <HealthSection allergies={allergies} />
-                <SpecialCareSection />
-              </div>
-            </form>
+            </EnrollmentForm>
           </div>
         </div>
       </main>
-      <StickyActionBar />
     </>
   );
 }

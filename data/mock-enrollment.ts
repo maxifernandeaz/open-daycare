@@ -10,7 +10,7 @@ export type SelectOption = { value: string; label: string };
 export type EnrollmentScreen = {
   breadcrumb: { label: string; href: string; icon?: string }[];
   header: { icon: string; title: string; subtitle: string };
-  topActions: { discard: string; save: string };
+  topActions: { discard: string; save: string; savePending: string };
   avatar: {
     src: string;
     alt: string;
@@ -75,7 +75,12 @@ export type EnrollmentScreen = {
     medicationDescription: string;
     vaccinationBanner: string;
   };
-  stickyBar: { privacy: string; cancel: string; submit: string };
+  stickyBar: {
+    privacy: string;
+    cancel: string;
+    submit: string;
+    submitPending: string;
+  };
 };
 
 const avatarPhoto =
@@ -108,7 +113,11 @@ export const enrollmentScreen: EnrollmentScreen = {
     subtitle:
       "Ingresa los datos del menor para integrarlo a su sala, planificar sus cuidados diarios y registrar protocolos médicos de prevención.",
   },
-  topActions: { discard: "Descartar", save: "Guardar Ficha" },
+  topActions: {
+    discard: "Descartar",
+    save: "Guardar Ficha",
+    savePending: "Guardando...",
+  },
   avatar: {
     src: avatarPhoto,
     alt: "Retrato de estudio cálido de un toddler alegre con luz natural suave y fondo verde menta desenfocado",
@@ -195,6 +204,7 @@ export const enrollmentScreen: EnrollmentScreen = {
       "Datos protegidos bajo protocolo RGPD de infancia y encriptación de grado escolar.",
     cancel: "Cancelar / Volver a la lista",
     submit: "Registrar Niño y Crear Ficha",
+    submitPending: "Registrando...",
   },
 };
 

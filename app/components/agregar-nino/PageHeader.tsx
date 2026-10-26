@@ -1,6 +1,7 @@
 import { Fragment } from "react";
 import Icon from "@/app/components/Icons";
 import { enrollmentScreen } from "@/data/mock-enrollment";
+import SubmitButton from "./SubmitButton";
 
 export default function PageHeader() {
   const { breadcrumb, header, topActions } = enrollmentScreen;
@@ -55,19 +56,19 @@ export default function PageHeader() {
         </div>
       </div>
       <div className="flex items-center gap-3 self-start md:self-auto shrink-0">
-        <button
+        <a
           className="px-5 py-2.5 rounded-xl font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container-low transition-all duration-200"
-          type="button"
+          href="/panel-aula"
         >
           {topActions.discard}
-        </button>
-        <button
+        </a>
+        <SubmitButton
           className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-primary text-on-primary font-label-lg text-label-lg shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
-          type="button"
-        >
-          <Icon name="verified" size={18} />
-          <span>{topActions.save}</span>
-        </button>
+          icon="verified"
+          iconSize={18}
+          label={topActions.save}
+          pendingLabel={topActions.savePending}
+        />
       </div>
     </div>
   );
