@@ -42,6 +42,9 @@ next-env.d.ts
 
 .playwright-mcp/* 
 
+# supabase cli
+supabase/.temp/
+
 .env*
 !.env.template
 
