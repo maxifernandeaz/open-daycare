@@ -10,10 +10,6 @@ type HealthSectionProps = {
 
 export default function HealthSection({ allergies }: HealthSectionProps) {
   const { health, addAllergyChip, defaults } = enrollmentScreen;
-  const allergyChips = allergies.map((allergy) => ({
-    id: allergy.code,
-    label: allergy.label,
-  }));
 
   return (
     <FormSection
@@ -33,7 +29,7 @@ export default function HealthSection({ allergies }: HealthSectionProps) {
         <label className="block font-label-md text-label-md text-on-surface">
           {health.chipsLabel}
         </label>
-        <AllergyChips addLabel={addAllergyChip} chips={allergyChips} />
+        <AllergyChips addLabel={addAllergyChip} allergies={allergies} />
       </div>
 
       <div className="mb-5">

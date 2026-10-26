@@ -6,7 +6,6 @@ export type ClassroomVisual = {
 };
 
 export type SelectOption = { value: string; label: string };
-export type Chip = { id: string; label: string };
 
 export type EnrollmentScreen = {
   breadcrumb: { label: string; href: string; icon?: string }[];
@@ -121,15 +120,15 @@ export const enrollmentScreen: EnrollmentScreen = {
     takePhoto: "Tomar foto con cámara del centro",
   },
   schedules: [
-    { value: "completa", label: "Jornada Completa con Almuerzo y Siesta (8:30 - 16:30)" },
-    { value: "manana", label: "Solo Mañanas con Comedor (8:30 - 13:30)" },
-    { value: "matinal", label: "Mañanas sin Comedor (9:00 - 12:30)" },
-    { value: "tarde", label: "Jornada Vespertina / Taller (14:30 - 18:00)" },
+    { value: "full_day", label: "Jornada Completa con Almuerzo y Siesta (8:30 - 16:30)" },
+    { value: "mornings_with_lunch", label: "Solo Mañanas con Comedor (8:30 - 13:30)" },
+    { value: "mornings_only", label: "Mañanas sin Comedor (9:00 - 12:30)" },
+    { value: "afternoon", label: "Jornada Vespertina / Taller (14:30 - 18:00)" },
   ],
   addAllergyChip: "Otra alergia específica",
   defaults: {
-    schedule: "completa",
-    gender: "nino",
+    schedule: "full_day",
+    gender: "boy",
     medicationConsent: true,
     urgentMedicalFlag: false,
   },
@@ -143,9 +142,9 @@ export const enrollmentScreen: EnrollmentScreen = {
     birthDateLabel: "Fecha de nacimiento",
     genderLabel: "Género / Identificación (opcional)",
     genderOptions: [
-      { value: "nino", label: "Niño", icon: "boy" },
-      { value: "nina", label: "Niña", icon: "girl" },
-      { value: "no_especificado", label: "Otro", icon: "more_horiz" },
+      { value: "boy", label: "Niño", icon: "boy" },
+      { value: "girl", label: "Niña", icon: "girl" },
+      { value: "other", label: "Otro", icon: "more_horiz" },
     ],
     documentLabel: "N° Documento / Libro de Familia",
     documentPlaceholder: "Ej: 54930218-K",
