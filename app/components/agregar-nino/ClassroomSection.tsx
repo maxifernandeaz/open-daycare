@@ -42,7 +42,8 @@ function ClassroomCardTile({ room }: { room: ClassroomOption }) {
       <input
         className="peer sr-only"
         defaultChecked={recommended}
-        name="classroom_choice"
+        name="classroom_id"
+        required
         type="radio"
         value={room.id}
       />
@@ -124,8 +125,9 @@ export default function ClassroomSection({
             </div>
             <select
               className={SELECT_CLASSES}
-              defaultValue={defaults.teacher}
+              defaultValue={educators[0]?.id ?? ""}
               id="assigned-teacher"
+              name="primary_educator_id"
             >
               {educators.map((educator) => (
                 <option key={educator.id} value={educator.id}>
@@ -154,6 +156,7 @@ export default function ClassroomSection({
               className={SELECT_CLASSES}
               defaultValue={defaults.schedule}
               id="stay-schedule"
+              name="schedule"
             >
               {schedules.map((schedule) => (
                 <option key={schedule.value} value={schedule.value}>

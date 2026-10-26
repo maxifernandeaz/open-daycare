@@ -46,6 +46,7 @@ export default function HealthSection({ allergies }: HealthSectionProps) {
         <textarea
           className="w-full p-3.5 bg-surface-container-lowest rounded-xl font-body-sm text-body-sm text-on-surface placeholder:text-outline focus:outline-none shadow-sm transition-all"
           id="allergy-details"
+          name="allergy_notes"
           placeholder={health.detailsPlaceholder}
           rows={3}
         />
@@ -57,6 +58,7 @@ export default function HealthSection({ allergies }: HealthSectionProps) {
             className="w-5 h-5 rounded-lg bg-surface cursor-pointer accent-error"
             defaultChecked={defaults.urgentMedicalFlag}
             id="urgent-medical-flag"
+            name="urgent_medical_flag"
             type="checkbox"
           />
         </div>

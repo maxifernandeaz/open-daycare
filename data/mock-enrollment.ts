@@ -24,10 +24,6 @@ export type EnrollmentScreen = {
   schedules: SelectOption[];
   addAllergyChip: string;
   defaults: {
-    birthDate: string;
-    ageLabel: string;
-    classroom: string;
-    teacher: string;
     schedule: string;
     gender: string;
     medicationConsent: boolean;
@@ -132,10 +128,6 @@ export const enrollmentScreen: EnrollmentScreen = {
   ],
   addAllergyChip: "Otra alergia específica",
   defaults: {
-    birthDate: "2025-04-12",
-    ageLabel: "18 meses",
-    classroom: "soles",
-    teacher: "camila",
     schedule: "completa",
     gender: "nino",
     medicationConsent: true,

@@ -21,18 +21,12 @@ function calculateAgeLabel(birthDate: string, today = new Date()): string {
 
 type BirthDateFieldProps = {
   label: string;
-  defaultValue: string;
-  initialAgeLabel: string;
 };
 
-export default function BirthDateField({
-  label,
-  defaultValue,
-  initialAgeLabel,
-}: BirthDateFieldProps) {
+export default function BirthDateField({ label }: BirthDateFieldProps) {
   const id = useId();
-  const [value, setValue] = useState(defaultValue);
-  const [ageLabel, setAgeLabel] = useState(initialAgeLabel);
+  const [value, setValue] = useState("");
+  const [ageLabel, setAgeLabel] = useState("");
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const nextValue = event.target.value;
@@ -48,10 +42,12 @@ export default function BirthDateField({
         <label className="font-label-lg text-label-lg text-on-surface" htmlFor={id}>
           {label} <span className="text-error">*</span>
         </label>
-        <span className="font-label-sm text-label-sm px-2.5 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-bold flex items-center gap-1">
-          <Icon name="schedule" size={12} />
-          <span>{ageLabel}</span>
-        </span>
+        {ageLabel ? (
+          <span className="font-label-sm text-label-sm px-2.5 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-bold flex items-center gap-1">
+            <Icon name="schedule" size={12} />
+            <span>{ageLabel}</span>
+          </span>
+        ) : null}
       </div>
       <div className="relative">
         <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-on-surface-variant">
@@ -60,7 +56,9 @@ export default function BirthDateField({
         <input
           className="w-full pl-11 pr-4 py-3 bg-surface rounded-xl font-body-md text-body-md text-on-surface focus:bg-surface-container-lowest focus:outline-none shadow-sm transition-all"
           id={id}
+          name="birth_date"
           onChange={handleChange}
+          required
           type="date"
           value={value}
         />

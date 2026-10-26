@@ -85,6 +85,7 @@ export default function IdentitySection() {
             <input
               className={ICON_INPUT_CLASSES}
               id="child-full-name"
+              name="full_name"
               placeholder={identity.fullNamePlaceholder}
               required
               type="text"
@@ -93,11 +94,7 @@ export default function IdentitySection() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <BirthDateField
-            defaultValue={defaults.birthDate}
-            initialAgeLabel={defaults.ageLabel}
-            label={identity.birthDateLabel}
-          />
+          <BirthDateField label={identity.birthDateLabel} />
           <div>
             <label className="block font-label-lg text-label-lg text-on-surface mb-2">
               {identity.genderLabel}
@@ -133,6 +130,7 @@ export default function IdentitySection() {
             <input
               className={TEXT_INPUT_CLASSES}
               id="child-doc-id"
+              name="document"
               placeholder={identity.documentPlaceholder}
               type="text"
             />
@@ -147,6 +145,7 @@ export default function IdentitySection() {
             <input
               className={TEXT_INPUT_CLASSES}
               id="child-nickname"
+              name="nickname"
               placeholder={identity.nicknamePlaceholder}
               type="text"
             />
