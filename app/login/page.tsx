@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import AuthField from "@/app/components/auth/AuthField";
 import LoginBrandPanel from "@/app/components/auth/LoginBrandPanel";
+import LoginForm from "@/app/components/auth/LoginForm";
 import { loginScreen } from "@/data/mock-auth";
 
 export const metadata: Metadata = {
@@ -20,10 +20,6 @@ const FORM_HEADER_CLASSES = "mb-8";
 const TITLE_CLASSES =
   "font-headline-lg text-headline-lg tracking-tight text-on-surface";
 const SUBTITLE_CLASSES = "mt-2 text-body-md text-on-surface-variant";
-const FORGOT_LINK_CLASSES =
-  "text-body-sm font-semibold text-primary hover:underline";
-const SUBMIT_CLASSES =
-  "w-full rounded-xl bg-primary-container px-6 py-3.5 text-on-primary font-label-lg text-label-lg shadow-[0_4px_14px_rgba(16,185,129,0.25)] transition-all hover:bg-primary focus:outline-none focus:ring-2 focus:ring-primary/40 active:scale-[0.99]";
 const INVITE_PREFIX_CLASSES = "mt-8 text-center text-body-sm text-on-surface-variant";
 const INVITE_LINK_CLASSES = "ml-1 font-bold text-primary hover:underline";
 
@@ -42,23 +38,7 @@ export default function LoginPage() {
               <p className={SUBTITLE_CLASSES}>{form.subtitle}</p>
             </header>
 
-            <form className="space-y-5">
-              {form.fields.map((field) => (
-                <AuthField field={field} key={field.id} />
-              ))}
-
-              <div className="flex justify-end pt-0.5">
-                <a className={FORGOT_LINK_CLASSES} href="#">
-                  {form.forgotLabel}
-                </a>
-              </div>
-
-              <div className="pt-3">
-                <button className={SUBMIT_CLASSES} type="button">
-                  {form.submitLabel}
-                </button>
-              </div>
-            </form>
+            <LoginForm form={form} />
 
             <p className={INVITE_PREFIX_CLASSES}>
               {footer.prefix}

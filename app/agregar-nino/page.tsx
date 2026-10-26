@@ -11,6 +11,7 @@ import {
   MAIN_TOP_CLASS,
   SIDEBAR_OFFSET_CLASS,
 } from "@/app/components/panel-aula/shell";
+import { requireStaff } from "@/utils/auth";
 
 export const metadata: Metadata = {
   title: "KiddiCare · Agregar Nuevo Niño",
@@ -18,7 +19,9 @@ export const metadata: Metadata = {
     "Alta completa de un niño en un solo formulario: datos personales e identidad, asignación de sala, alergias, salud, siesta y cuidados especiales.",
 };
 
-export default function AgregarNinoPage() {
+export default async function AgregarNinoPage() {
+  await requireStaff();
+
   return (
     <>
       <AppSidebar activePath="alumnos-y-familias" />

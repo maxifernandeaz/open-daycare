@@ -26,6 +26,7 @@ export const loginScreen = {
         type: "email",
         placeholder: "tu@correo.com",
         autoComplete: "email",
+        required: true,
       },
       {
         id: "password",
@@ -34,6 +35,7 @@ export const loginScreen = {
         type: "password",
         placeholder: "••••••••",
         autoComplete: "current-password",
+        required: true,
       },
     ] satisfies AuthFieldData[],
     forgotLabel: "¿Olvidaste tu contraseña?",
@@ -106,6 +108,7 @@ export type AuthFieldData = {
   readOnly?: boolean;
   autoComplete?: string;
   spaced?: boolean;
+  required?: boolean;
 };
 
 export type LoginScreen = {

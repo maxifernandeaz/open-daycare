@@ -10,6 +10,7 @@ import OpsHero from "@/app/components/panel-aula/OpsHero";
 import PickupQueuePanel from "@/app/components/panel-aula/PickupQueuePanel";
 import StudentRoster from "@/app/components/panel-aula/StudentRoster";
 import { MAIN_TOP_CLASS, SIDEBAR_OFFSET_CLASS } from "@/app/components/panel-aula/shell";
+import { requireStaff } from "@/utils/auth";
 
 export const metadata: Metadata = {
   title: "KiddiCare · Panel de Aula",
@@ -17,7 +18,9 @@ export const metadata: Metadata = {
     "Monitor operativo del aula: asistencia, comedor, siesta, recogidas y protocolos de salud en tiempo real.",
 };
 
-export default function PanelAulaPage() {
+export default async function PanelAulaPage() {
+  await requireStaff();
+
   return (
     <>
       <AppSidebar />

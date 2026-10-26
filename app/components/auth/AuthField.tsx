@@ -26,6 +26,7 @@ export default function AuthField({ field }: AuthFieldProps) {
         name={field.name}
         placeholder={field.placeholder}
         readOnly={field.readOnly}
+        required={field.required}
         type={field.type}
       />
     </div>
