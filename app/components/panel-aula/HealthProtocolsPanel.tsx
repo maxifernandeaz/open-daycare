@@ -41,9 +41,11 @@ export default function HealthProtocolsPanel({
   protocols,
 }: HealthProtocolsPanelProps) {
   const subtitle =
-    protocols.length === 1
-      ? "1 alerta en seguimiento"
-      : `${protocols.length} alertas en seguimiento`;
+    protocols.length === 0
+      ? "Sin alertas en seguimiento"
+      : protocols.length === 1
+        ? "1 alerta en seguimiento"
+        : `${protocols.length} alertas en seguimiento`;
 
   return (
     <PanelCard
