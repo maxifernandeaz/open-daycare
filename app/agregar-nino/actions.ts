@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import type { Database } from "@/types/database";
 import { createClient } from "@/utils/supabase/server";
@@ -187,6 +188,8 @@ export async function createChild(
 
     return { status: "error", message: GENERIC_ERROR };
   }
+
+  revalidatePath("/panel-aula");
 
   return { status: "success", message: SUCCESS_MESSAGE, childId };
 }
