@@ -26,7 +26,28 @@ const FILTER_ACTIVE_CLASSES =
 const FILTER_IDLE_CLASSES =
   "px-3 py-1.5 rounded-lg text-on-surface-variant hover:text-on-surface font-label-sm text-label-sm font-semibold whitespace-nowrap transition-colors";
 
-export default function ActionDock() {
+type ActionDockProps = {
+  totalChildren: number;
+  healthAlertCount: number;
+};
+
+type StatusPill = {
+  label: string;
+  count: string;
+  active?: boolean;
+};
+
+export default function ActionDock({
+  totalChildren,
+  healthAlertCount,
+}: ActionDockProps) {
+  const statusFilters: StatusPill[] = [
+    { label: "Todos", count: String(totalChildren), active: true },
+    { label: "Presentes", count: "—" },
+    { label: "En Siesta", count: "—" },
+    { label: "Alergias / Meds", count: String(healthAlertCount) },
+  ];
+
   return (
     <section className={DOCK_CLASSES}>
       <div className="flex items-center flex-wrap gap-2">
@@ -46,7 +67,7 @@ export default function ActionDock() {
       </div>
 
       <div className={FILTER_TRACK_CLASSES}>
-        {classroomPanel.statusFilters.map((filter) => (
+        {statusFilters.map((filter) => (
           <button
             className={filter.active ? FILTER_ACTIVE_CLASSES : FILTER_IDLE_CLASSES}
             key={filter.label}

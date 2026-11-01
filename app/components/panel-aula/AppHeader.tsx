@@ -10,8 +10,13 @@ const SELECTOR_CLASSES =
 const ICON_BUTTON_CLASSES =
   "w-10 h-10 rounded-xl bg-surface-container-low flex items-center justify-center text-on-surface-variant hover:bg-surface-container transition-colors";
 
-export default function AppHeader() {
+type AppHeaderProps = {
+  classroomLabel?: string;
+};
+
+export default function AppHeader({ classroomLabel }: AppHeaderProps = {}) {
   const { header, user } = classroomShell;
+  const classroomValue = classroomLabel ?? header.classroomSelector.value;
 
   return (
     <header
@@ -27,7 +32,7 @@ export default function AppHeader() {
                   {header.classroomSelector.label}
                 </span>
                 <span className="font-title-md text-title-md text-on-surface">
-                  {header.classroomSelector.value}
+                  {classroomValue}
                 </span>
               </div>
               <Icon

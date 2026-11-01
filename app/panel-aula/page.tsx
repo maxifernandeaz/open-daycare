@@ -11,6 +11,7 @@ import PickupQueuePanel from "@/app/components/panel-aula/PickupQueuePanel";
 import StudentRoster from "@/app/components/panel-aula/StudentRoster";
 import { MAIN_TOP_CLASS, SIDEBAR_OFFSET_CLASS } from "@/app/components/panel-aula/shell";
 import { requireStaff } from "@/utils/auth";
+import { getClassroomPanelData } from "./queries";
 
 export const metadata: Metadata = {
   title: "KiddiCare · Panel de Aula",
@@ -20,25 +21,34 @@ export const metadata: Metadata = {
 
 export default async function PanelAulaPage() {
   await requireStaff();
+  const { students, protocols, totalChildren, error } =
+    await getClassroomPanelData();
 
   return (
     <>
       <AppSidebar />
-      <AppHeader />
+      <AppHeader classroomLabel="Todas las aulas" />
       <main
         className={`relative ${MAIN_TOP_CLASS} ${SIDEBAR_OFFSET_CLASS} w-full bg-background min-h-screen font-body-md text-body-md`}
       >
         <div className="flex flex-col w-full px-8 pb-16 space-y-6">
           <OpsHero />
-          <KpiRow />
-          <ActionDock />
+          <KpiRow totalChildren={totalChildren} />
+          <ActionDock
+            healthAlertCount={protocols.length}
+            totalChildren={totalChildren}
+          />
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             <div className="lg:col-span-8 space-y-4">
-              <StudentRoster />
+              <StudentRoster
+                error={error}
+                students={students}
+                totalChildren={totalChildren}
+              />
               <NextActivityBanner />
             </div>
             <div className="lg:col-span-4 space-y-6">
-              <HealthProtocolsPanel />
+              <HealthProtocolsPanel protocols={protocols} />
               <PickupQueuePanel />
               <ActivityLogPanel />
             </div>
