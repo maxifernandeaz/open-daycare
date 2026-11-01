@@ -229,6 +229,8 @@ export type Database = {
           id: string
           is_legal_guardian: boolean
           is_primary: boolean
+          photo_consent: boolean
+          photo_consent_at: string | null
           relationship: string | null
           tutor_id: string
           updated_at: string
@@ -239,6 +241,8 @@ export type Database = {
           id?: string
           is_legal_guardian?: boolean
           is_primary?: boolean
+          photo_consent?: boolean
+          photo_consent_at?: string | null
           relationship?: string | null
           tutor_id: string
           updated_at?: string
@@ -249,6 +253,8 @@ export type Database = {
           id?: string
           is_legal_guardian?: boolean
           is_primary?: boolean
+          photo_consent?: boolean
+          photo_consent_at?: string | null
           relationship?: string | null
           tutor_id?: string
           updated_at?: string
@@ -414,6 +420,73 @@ export type Database = {
         }
         Relationships: []
       }
+      invitations: {
+        Row: {
+          accepted_at: string | null
+          accepted_by: string | null
+          child_id: string
+          code: string
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          invited_by: string | null
+          relationship: string | null
+          status: Database["public"]["Enums"]["invitation_status"]
+          updated_at: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          child_id: string
+          code: string
+          created_at?: string
+          email: string
+          expires_at?: string
+          id?: string
+          invited_by?: string | null
+          relationship?: string | null
+          status?: Database["public"]["Enums"]["invitation_status"]
+          updated_at?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          child_id?: string
+          code?: string
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          invited_by?: string | null
+          relationship?: string | null
+          status?: Database["public"]["Enums"]["invitation_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invitations_accepted_by_fkey"
+            columns: ["accepted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invitations_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invitations_invited_by_fkey"
+            columns: ["invited_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -461,6 +534,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_tutor_invitation: {
+        Args: { p_code: string; p_photo_consent?: boolean }
+        Returns: string
+      }
       create_child: {
         Args: {
           p_allergy_codes: string[]
@@ -481,12 +558,34 @@ export type Database = {
         }
         Returns: string
       }
+      create_tutor_invitation: {
+        Args: { p_child_id: string; p_email: string; p_relationship?: string }
+        Returns: {
+          code: string
+          expires_at: string
+          invitation_id: string
+        }[]
+      }
+      get_invitation_preview: {
+        Args: { p_code: string }
+        Returns: {
+          child_display_name: string
+          classroom_name: string
+          email: string
+          expires_at: string
+        }[]
+      }
       is_active_admin: { Args: never; Returns: boolean }
       is_active_manager: { Args: never; Returns: boolean }
       is_active_staff: { Args: never; Returns: boolean }
+      revoke_tutor_invitation: {
+        Args: { p_invitation_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       gender: "boy" | "girl" | "other"
+      invitation_status: "pending" | "accepted" | "revoked" | "expired"
       schedule:
         | "full_day"
         | "mornings_with_lunch"
@@ -615,13 +714,14 @@ export type CompositeTypes<
 }
   ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-    ? PublicCompositeTypeNameOrOptions
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
 
 export const Constants = {
   public: {
     Enums: {
       gender: ["boy", "girl", "other"],
+      invitation_status: ["pending", "accepted", "revoked", "expired"],
       schedule: [
         "full_day",
         "mornings_with_lunch",
