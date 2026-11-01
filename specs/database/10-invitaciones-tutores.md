@@ -319,29 +319,29 @@ export type InvitationPreview = {
 
 ## Acceptance criteria
 
-- [ ] La migración `<timestamp>_tutor_invitations_and_tutor_rls` aparece en `supabase_list_migrations`.
-- [ ] El enum `public.invitation_status` existe con los valores `pending`, `accepted`, `revoked`, `expired` en ese orden.
-- [ ] `public.invitations` existe con las 12 columnas del Data model, `id` como PK y FKs a `children`, `profiles` (`invited_by`) y `profiles` (`accepted_by`).
-- [ ] `invitations.email` tiene `check (email = lower(btrim(email)))` y el check de forma de email; `invitations.code` tiene el check de 5 caracteres del alfabeto permitido.
-- [ ] Existe el índice único `invitations_pending_child_email_idx` sobre `(child_id, lower(email)) where status = 'pending'` y el índice único de `code`.
-- [ ] `child_tutors` tiene `photo_consent boolean not null default false` y `photo_consent_at timestamptz`; las filas existentes quedan en `false`/`null`.
-- [ ] `invitations` tiene RLS habilitado y exactamente las 3 policies `invitations_select_staff`, `invitations_insert_staff` e `invitations_update_staff`, todas `to authenticated`.
-- [ ] `child_tutors` tiene RLS habilitado y exactamente la policy `child_tutors_select_own_or_staff`, `to authenticated`, con el predicado `tutor_id = auth.uid()` o `is_active_staff()`.
-- [ ] `children`, `child_health` y `child_allergies` tienen una policy nueva cada una, `to authenticated`, limitada a los niños vinculados al `auth.uid()`.
-- [ ] `anon` no tiene privilegios de tabla sobre `public.invitations` ni `public.child_tutors`.
-- [ ] `public.create_tutor_invitation(uuid, text, text)` existe, es `security invoker`, tiene `search_path = ''` y solo `authenticated` puede ejecutarla.
-- [ ] `public.revoke_tutor_invitation(uuid)` existe, es `security invoker`, tiene `search_path = ''` y solo `authenticated` puede ejecutarla.
-- [ ] `public.accept_tutor_invitation(text, boolean)` existe, es `security definer`, tiene `search_path = ''` y solo `authenticated` puede ejecutarla.
-- [ ] `pg_get_functiondef('public.accept_tutor_invitation(text,boolean)'::regprocedure)` contiene `for update`, la validación de `auth.jwt() ->> 'email'`, el `on conflict (child_id, tutor_id)` y el branch idempotente `accepted_by = v_user_id`.
-- [ ] `pg_get_functiondef('public.accept_tutor_invitation(text,boolean)'::regprocedure)` **no** contiene `status = 'expired'`: al vencer lanza la excepción sin persistir un estado que el rollback revertiría.
-- [ ] `public.get_invitation_preview(text)` existe, es `security definer`, `stable`, tiene `search_path = ''`, devuelve las 4 columnas del contrato y tiene `execute` para `anon` y `authenticated`.
-- [ ] `pg_get_functiondef('public.get_invitation_preview(text)'::regprocedure)` contiene `coalesce(c.nickname, pg_catalog.split_part(c.full_name, ' ', 1))`, `i.status = 'pending'` y `i.expires_at > pg_catalog.now()`.
-- [ ] `pg_get_functiondef('public.create_tutor_invitation(uuid,text,text)'::regprocedure)` contiene `lower(btrim(`, `interval '7 days'`, el alfabeto `ABCDEFGHJKMNPQRSTUVWXYZ23456789` y `pg_catalog.random()`.
-- [ ] `types/database.ts` incluye `invitation_status`, `invitations`, las dos columnas de `child_tutors` y las cuatro funciones; `npx tsc --noEmit` pasa.
-- [ ] `npm run lint`, `npx tsc --noEmit` y `npm run build` pasan.
-- [ ] `supabase_get_advisors` no reporta ningún `ERROR`; los `WARN`/`INFO` quedan documentados en el informe.
-- [ ] `git diff --name-only` solo muestra la migración, `types/database.ts` y este spec; no hay cambios en `app/`, `data/` ni en otros specs.
-- [ ] No se escribe ninguna fila de prueba con SQL ad-hoc: la migración es la única fuente de cambios.
+- [x] La migración `<timestamp>_tutor_invitations_and_tutor_rls` aparece en `supabase_list_migrations`.
+- [x] El enum `public.invitation_status` existe con los valores `pending`, `accepted`, `revoked`, `expired` en ese orden.
+- [x] `public.invitations` existe con las 12 columnas del Data model, `id` como PK y FKs a `children`, `profiles` (`invited_by`) y `profiles` (`accepted_by`).
+- [x] `invitations.email` tiene `check (email = lower(btrim(email)))` y el check de forma de email; `invitations.code` tiene el check de 5 caracteres del alfabeto permitido.
+- [x] Existe el índice único `invitations_pending_child_email_idx` sobre `(child_id, lower(email)) where status = 'pending'` y el índice único de `code`.
+- [x] `child_tutors` tiene `photo_consent boolean not null default false` y `photo_consent_at timestamptz`; las filas existentes quedan en `false`/`null`.
+- [x] `invitations` tiene RLS habilitado y exactamente las 3 policies `invitations_select_staff`, `invitations_insert_staff` e `invitations_update_staff`, todas `to authenticated`.
+- [x] `child_tutors` tiene RLS habilitado y exactamente la policy `child_tutors_select_own_or_staff`, `to authenticated`, con el predicado `tutor_id = auth.uid()` o `is_active_staff()`.
+- [x] `children`, `child_health` y `child_allergies` tienen una policy nueva cada una, `to authenticated`, limitada a los niños vinculados al `auth.uid()`.
+- [x] `anon` no tiene privilegios de tabla sobre `public.invitations` ni `public.child_tutors`.
+- [x] `public.create_tutor_invitation(uuid, text, text)` existe, es `security invoker`, tiene `search_path = ''` y solo `authenticated` puede ejecutarla.
+- [x] `public.revoke_tutor_invitation(uuid)` existe, es `security invoker`, tiene `search_path = ''` y solo `authenticated` puede ejecutarla.
+- [x] `public.accept_tutor_invitation(text, boolean)` existe, es `security definer`, tiene `search_path = ''` y solo `authenticated` puede ejecutarla.
+- [x] `pg_get_functiondef('public.accept_tutor_invitation(text,boolean)'::regprocedure)` contiene `for update`, la validación de `auth.jwt() ->> 'email'`, el `on conflict (child_id, tutor_id)` y el branch idempotente `accepted_by = v_user_id`.
+- [x] `pg_get_functiondef('public.accept_tutor_invitation(text,boolean)'::regprocedure)` **no** contiene `status = 'expired'`: al vencer lanza la excepción sin persistir un estado que el rollback revertiría.
+- [x] `public.get_invitation_preview(text)` existe, es `security definer`, `stable`, tiene `search_path = ''`, devuelve las 4 columnas del contrato y tiene `execute` para `anon` y `authenticated`.
+- [x] `pg_get_functiondef('public.get_invitation_preview(text)'::regprocedure)` contiene `coalesce(c.nickname, pg_catalog.split_part(c.full_name, ' ', 1))`, `i.status = 'pending'` y `i.expires_at > pg_catalog.now()`.
+- [x] `pg_get_functiondef('public.create_tutor_invitation(uuid,text,text)'::regprocedure)` contiene `lower(btrim(`, `interval '7 days'`, el alfabeto `ABCDEFGHJKMNPQRSTUVWXYZ23456789` y `pg_catalog.random()`.
+- [x] `types/database.ts` incluye `invitation_status`, `invitations`, las dos columnas de `child_tutors` y las cuatro funciones; `npx tsc --noEmit` pasa.
+- [x] `npm run lint`, `npx tsc --noEmit` y `npm run build` pasan.
+- [x] `supabase_get_advisors` no reporta ningún `ERROR`; los `WARN`/`INFO` quedan documentados en el informe.
+- [x] `git diff --name-only` solo muestra la migración, `types/database.ts` y este spec; no hay cambios en `app/`, `data/` ni en otros specs.
+- [x] No se escribe ninguna fila de prueba con SQL ad-hoc: la migración es la única fuente de cambios.
 
 ## Decisions
 
