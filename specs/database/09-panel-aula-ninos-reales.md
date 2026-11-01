@@ -1,6 +1,6 @@
 # SPEC 09 — Panel de Aula · Niños Reales
 
-> **Estado:** Aprobado
+> **Estado:** Implementado
 > **Depende de:** SPEC 02, SPEC 05, SPEC 06, SPEC 07, SPEC 08
 > **Fecha:** 2026-11-01
 > **Objetivo:** Reemplazar los niños y protocolos ficticios de `/panel-aula` por los niños reales de Supabase, incluidos los recién creados, con búsqueda por nombre y contadores ajustados, sin depender de `child_tutors`.
