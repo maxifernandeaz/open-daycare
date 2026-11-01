@@ -95,9 +95,9 @@ allergies: id, code, label, is_none.
 Los mapas se construyen en memoria por id. Un aula o educadora ausente produce "Sin aula" o null, nunca un error. Si cualquiera de las seis consultas falla, se devuelve students: [], protocols: [], totalChildren: 0 y error: "No se pudieron cargar los niños.".
 
 Reglas de derivación
-Edad: meses = (añoActual - añoNacimiento) * 12 + (mesActual - mesNacimiento). Menos de 36 meses → "N meses". Desde 36 meses → "N años" más " M m" si sobran meses. Al 2026-11-01, Noa (2020-04-01) muestra "6 años 7 m".
+Edad: meses = (añoActual - añoNacimiento) * 12 + (mesActual - mesNacimiento). Menos de 36 meses → "N meses". Desde 36 meses → "N años" más " M m" si sobran meses. Al 2026-11-01, Emma (2022-12-24) muestra "3 años 11 m".
 
-Iniciales: primera letra de las dos primeras palabras del nombre completo, en mayúsculas. "Noa" → "N"; "Sofía Navarro" → "SN".
+Iniciales: primera letra de las dos primeras palabras del nombre completo, en mayúsculas. "Emma" → "E"; "Sofía Navarro" → "SN".
 
 Horario: full_day → "Jornada completa"; mornings_with_lunch → "Mañanas con almuerzo"; mornings_only → "Solo mañanas"; afternoon → "Solo tardes"; null → "Sin horario".
 
@@ -135,7 +135,7 @@ KPIs y pills. Adaptar KpiRow.tsx y ActionDock.tsx a los conteos reales y a — e
 
 Header. Añadir classroomLabel opcional a AppHeader.tsx y pasar "Todas las aulas" desde el panel. Verificar: /agregar-nino conserva "Aula Estrellitas".
 
-Cableado. Actualizar app/panel-aula/page.tsx con requireStaff(), la query y todas las props. Verificar: GET /panel-aula muestra los niños reales, Noa primero, 3 protocolos y conteos reales.
+Cableado. Actualizar app/panel-aula/page.tsx con requireStaff(), la query y todas las props. Verificar: GET /panel-aula muestra los niños reales, el orden real (Emma primero por desempate de nombre), 3 protocolos y conteos reales.
 
 Limpieza. Quitar de data/mock-classroom.ts los datos y tipos sin uso. Verificar: grep sin referencias y npm run build.
 
@@ -144,13 +144,13 @@ Refresco tras alta. Añadir revalidatePath("/panel-aula") en app/agregar-nino/ac
 Verificación final. npm run lint, npx tsc --noEmit, npm run build, Playwright a 1440px y 375px, consola limpia, screenshots en .playwright-mcp/, regresión de /, /login, /activar-cuenta y /agregar-nino, y supabase_list_migrations sin cambios.
 
 Acceptance criteria
-[ ] /panel-aula muestra exactamente los niños de children (7 al momento del spec) y ningún niño solo de mock, como Pablo Rivas.
+[ ] /panel-aula muestra exactamente los niños de children (6 al momento del spec) y ningún niño solo de mock, como Pablo Rivas.
 
-[ ] El niño más reciente por created_at aparece primero; al 2026-11-01 es Noa, de Sala Soles.
+[ ] Se respeta el orden created_at descendente con desempate full_name ascendente; al 2026-11-01 los 6 niños del seed comparten created_at y Emma Díaz aparece primera.
 
 [ ] Cada tarjeta muestra nombre, edad calculada desde birth_date, aula, educadora y horario; no muestra línea de tutor, punto de presencia, siesta, almuerzo, pañal ni check-in.
 
-[ ] Mateo muestra el tag de APLV; Martina, el de gluten; Emma, "Alerta médica"; Noa, Sofía, Lucas y Leo no muestran tag.
+[ ] Mateo muestra el tag de APLV; Martina, el de gluten; Emma, "Alerta médica"; Sofía, Lucas y Leo no muestran tag.
 
 [ ] El panel de protocolos lista exactamente a los niños con alergia específica o flag urgente (3 al momento del spec) y el subtítulo coincide con ese número.
 
@@ -158,7 +158,7 @@ Acceptance criteria
 
 [ ] Los pills muestran Todos con el total real, Alergias / Meds con el número de protocolos, y Presentes y En Siesta con —; ninguno filtra ni navega.
 
-[ ] Buscar noa devuelve 1 tarjeta; buscar sofia sin tilde devuelve a Sofía; buscar zzz muestra el mensaje de sin resultados; limpiar el buscador restaura todos.
+[ ] Buscar emma devuelve 1 tarjeta; buscar sofia sin tilde devuelve a Sofía; buscar zzz muestra el mensaje de sin resultados; limpiar el buscador restaura todos.
 
 [ ] Un error de query muestra el banner role="alert" y la página no lanza un 500.
 
