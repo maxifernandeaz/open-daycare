@@ -9,7 +9,7 @@ const BLOB_BOTTOM_CLASSES = `${BLOB_CLASSES} h-[380px] w-[380px] -bottom-[90px] 
 
 const HEADLINE_CLASSES = "font-display-lg text-display-lg text-on-primary";
 const SUBTITLE_CLASSES =
-  "mt-5 text-body-md text-on-primary/85 leading-relaxed sm:text-body-lg";
+  "mt-5 text-body-md text-on-primary leading-relaxed sm:text-body-lg";
 const FOOTER_CLASSES =
   "flex items-center gap-2 pt-4 text-body-md font-medium text-on-primary/90";
 
