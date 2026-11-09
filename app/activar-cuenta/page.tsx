@@ -30,13 +30,13 @@ const FORM_CLASSES = "w-full space-y-5";
 const CONSENT_BANNER_CLASSES =
   "flex w-full items-start gap-3 rounded-xl border border-tertiary-fixed bg-tertiary-fixed/30 p-3.5 sm:items-center sm:p-4";
 const CONSENT_CONTROL_CLASSES =
-  "relative flex shrink-0 cursor-pointer select-none items-center";
+  "relative flex w-full cursor-pointer select-none items-start gap-3 sm:items-center";
 const CONSENT_BOX_CLASSES =
-  "flex h-6 w-6 items-center justify-center rounded-md bg-primary-container text-on-primary transition-all peer-focus:ring-2 peer-focus:ring-primary/30";
+  "flex h-6 w-6 shrink-0 items-center justify-center rounded-md border border-outline bg-surface-container-lowest text-transparent transition-colors peer-checked:border-primary peer-checked:bg-primary peer-checked:text-on-primary peer-focus:ring-2 peer-focus:ring-primary peer-focus:ring-offset-2 peer-focus:ring-offset-background";
 const CONSENT_TEXT_CLASSES =
   "cursor-pointer select-none text-body-md leading-snug text-on-surface-variant";
 const SUBMIT_CLASSES =
-  "w-full rounded-2xl bg-primary-container px-6 py-4 font-label-lg text-label-lg text-on-primary shadow-[0_4px_14px_rgba(16,185,129,0.25)] transition-all duration-200 ease-in-out hover:bg-primary focus:outline-none focus:ring-2 focus:ring-primary/40 active:scale-[0.99]";
+  "w-full rounded-2xl bg-primary px-6 py-4 font-label-lg text-label-lg text-on-primary shadow-[0_4px_14px_rgba(16,185,129,0.25)] transition-all duration-200 ease-in-out hover:bg-on-primary-container focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background active:scale-[0.99]";
 
 const CONSENT_INPUT_ID = "photo-consent";
 
@@ -54,7 +54,9 @@ export default function ActivarCuentaPage() {
         </header>
 
         <section className={CHILD_CARD_CLASSES}>
-          <div className={CHILD_AVATAR_CLASSES}>{child.initial}</div>
+          <div aria-hidden="true" className={CHILD_AVATAR_CLASSES}>
+            {child.initial}
+          </div>
 
           <div className="flex flex-col">
             <span className={CHILD_LABEL_CLASSES}>{child.invitationLabel}</span>
@@ -72,19 +74,16 @@ export default function ActivarCuentaPage() {
           <div className={CONSENT_BANNER_CLASSES}>
             <label className={CONSENT_CONTROL_CLASSES} htmlFor={CONSENT_INPUT_ID}>
               <input
-                className="peer sr-only"
+                className="peer absolute inset-0 h-full w-full cursor-pointer opacity-0"
                 defaultChecked
                 id={CONSENT_INPUT_ID}
                 name="photoConsent"
                 type="checkbox"
               />
-              <span className={CONSENT_BOX_CLASSES}>
+              <span aria-hidden="true" className={CONSENT_BOX_CLASSES}>
                 <Icon name="check" size={16} />
               </span>
-            </label>
-
-            <label className={CONSENT_TEXT_CLASSES} htmlFor={CONSENT_INPUT_ID}>
-              {consent.label}
+              <span className={CONSENT_TEXT_CLASSES}>{consent.label}</span>
             </label>
           </div>
 

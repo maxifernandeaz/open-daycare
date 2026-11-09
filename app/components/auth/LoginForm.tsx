@@ -11,7 +11,7 @@ const ERROR_CLASSES =
   "rounded-xl border border-error/30 bg-error-container px-4 py-3 text-body-sm text-on-error-container";
 
 const FORGOT_LINK_CLASSES =
-  "inline-flex min-h-6 items-center text-body-sm font-semibold text-primary hover:underline";
+  "inline-flex min-h-6 items-center rounded-sm text-body-sm font-semibold text-primary hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary";
 
 const SUBMIT_CLASSES =
   "w-full rounded-xl bg-primary-container px-6 py-3.5 text-on-primary-container font-label-lg text-label-lg shadow-[0_4px_14px_rgba(16,185,129,0.25)] transition-all hover:bg-primary hover:text-on-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:bg-primary-container disabled:hover:text-on-primary-container disabled:active:scale-100";

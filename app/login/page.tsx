@@ -21,7 +21,8 @@ const TITLE_CLASSES =
   "font-headline-lg text-headline-lg tracking-tight text-on-surface";
 const SUBTITLE_CLASSES = "mt-2 text-body-md text-on-surface-variant";
 const INVITE_PREFIX_CLASSES = "mt-8 text-center text-body-sm text-on-surface-variant";
-const INVITE_LINK_CLASSES = "ml-1 font-bold text-primary hover:underline";
+const INVITE_LINK_CLASSES =
+  "ml-1 inline-flex min-h-6 items-center rounded-sm font-bold text-primary hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary";
 
 export default function LoginPage() {
   const { form, footer } = loginScreen;
