@@ -1,8 +1,7 @@
 ---
 description: Auditor de ciberseguridad de PostgreSQL/Supabase y control de acceso en Next.js. Detecta fugas de datos (BOLA/IDOR) por RLS mal configurado o uso inseguro del SDK entre padres, niños, personal e invitados. Solo lectura; entrega informe en español con SQL/TS de remediación. Úsalo para auditar RLS, políticas, migraciones, Server Actions, Route Handlers y flujos de invitación/activación.
-mode: subagent
-model: google/gemini-2.5-pro
-steps: 35
+mode: all
+steps: 50
 permission:
   edit: deny
   task: deny

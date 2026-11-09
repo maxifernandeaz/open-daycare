@@ -42,6 +42,9 @@ next-env.d.ts
 
 .playwright-mcp/* 
 
+# opencode security audit reports
+.opencode/logs/
+
 # supabase cli
 supabase/.temp/
 
