@@ -17,6 +17,13 @@ export type ClassroomOption = {
 };
 
 export type EducatorOption = { id: string; label: string };
+
+type StaffProfileRow = {
+  id: string;
+  full_name: string;
+  role: "admin" | "director" | "educator";
+  avatar_url: string | null;
+};
 export type AllergyOption = {
   id: string;
   code: string;
@@ -58,12 +65,7 @@ export async function getEnrollmentCatalogs(): Promise<EnrollmentCatalogsResult>
       .select("id, code, label, is_none")
       .order("is_none", { ascending: false })
       .order("label", { ascending: true }),
-    supabase
-      .from("profiles")
-      .select("id, full_name")
-      .in("role", ["admin", "director", "educator"])
-      .eq("status", "active")
-      .order("full_name", { ascending: true }),
+    supabase.rpc("list_active_staff_profiles"),
   ]);
 
   if (classroomsResult.error || allergiesResult.error || educatorsResult.error) {
@@ -95,7 +97,9 @@ export async function getEnrollmentCatalogs(): Promise<EnrollmentCatalogsResult>
     isNone: allergy.is_none,
   }));
 
-  const educators: EducatorOption[] = educatorsResult.data.map((educator) => ({
+  const staffProfiles: StaffProfileRow[] = educatorsResult.data ?? [];
+
+  const educators: EducatorOption[] = staffProfiles.map((educator) => ({
     id: educator.id,
     label: educator.full_name,
   }));
