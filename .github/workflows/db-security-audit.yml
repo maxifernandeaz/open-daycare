@@ -1,0 +1,44 @@
+name: DB Security Audit
+
+on:
+  schedule:
+    - cron: "0 21 * * 5" # viernes 21:00 UTC = 18:00 ART (UTC-3)
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install opencode
+        run: npm install -g opencode-ai@1.19.5
+
+      - name: Run db-security-auditor
+        env:
+          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+        run: |
+          mkdir -p artifacts
+          opencode run \
+            --dir "$GITHUB_WORKSPACE" \
+            --agent db-security-auditor \
+            --model opencode/mimo-v2.6-flash-free \
+            "Realiza una auditoría estática de seguridad de PostgreSQL/Supabase y control de acceso. No hay MCP de Supabase ni credenciales de base de datos en este entorno: no intentes conectarte a la base. Revisa únicamente los archivos versionados: supabase/migrations/, app/, utils/supabase/ y proxy.ts. Entrega el informe en español por severidad con SQL/TS de remediación." \
+            2>&1 | tee artifacts/db-security-audit.md
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: db-security-audit
+          path: artifacts/db-security-audit.md
+          retention-days: 90
+          if-no-files-found: warn

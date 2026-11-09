@@ -1,8 +1,13 @@
 "use client";
 
-import { useTransition } from "react";
+import { useFormStatus } from "react-dom";
 import Icon from "@/app/components/Icons";
 import { signOut } from "@/app/auth/actions";
+
+const LOGOUT_LABEL = "Cerrar sesión";
+const LOGOUT_ICON = "logout";
+const ICON_VARIANT_ICON_SIZE = 20;
+const LINK_VARIANT_ICON_SIZE = 18;
 
 const ICON_CLASSES =
   "w-10 h-10 rounded-xl bg-surface-container-low flex items-center justify-center text-on-surface-variant hover:bg-surface-container transition-colors disabled:cursor-not-allowed disabled:opacity-60";
@@ -14,39 +19,41 @@ type LogoutButtonProps = {
   variant: "icon" | "link";
 };
 
-export default function LogoutButton({ variant }: LogoutButtonProps) {
-  const [isPending, startTransition] = useTransition();
-
-  const handleLogout = () => {
-    startTransition(async () => {
-      await signOut();
-    });
-  };
+function LogoutSubmitButton({ variant }: LogoutButtonProps) {
+  const { pending } = useFormStatus();
 
   if (variant === "icon") {
     return (
       <button
-        aria-label="Cerrar sesión"
+        aria-busy={pending}
+        aria-label={LOGOUT_LABEL}
         className={ICON_CLASSES}
-        disabled={isPending}
-        onClick={handleLogout}
-        title="Cerrar sesión"
-        type="button"
+        disabled={pending}
+        title={LOGOUT_LABEL}
+        type="submit"
       >
-        <Icon name="logout" size={20} />
+        <Icon name={LOGOUT_ICON} size={ICON_VARIANT_ICON_SIZE} />
       </button>
     );
   }
 
   return (
     <button
+      aria-busy={pending}
       className={LINK_CLASSES}
-      disabled={isPending}
-      onClick={handleLogout}
-      type="button"
+      disabled={pending}
+      type="submit"
     >
-      <Icon name="logout" size={18} />
-      <span>Cerrar sesión</span>
+      <Icon name={LOGOUT_ICON} size={LINK_VARIANT_ICON_SIZE} />
+      <span>{LOGOUT_LABEL}</span>
     </button>
+  );
+}
+
+export default function LogoutButton({ variant }: LogoutButtonProps) {
+  return (
+    <form action={signOut} className="contents">
+      <LogoutSubmitButton variant={variant} />
+    </form>
   );
 }

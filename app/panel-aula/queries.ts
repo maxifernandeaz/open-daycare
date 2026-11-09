@@ -47,6 +47,13 @@ type ChildAllergyEntry = {
   notes: string | null;
 };
 
+type StaffProfileRow = {
+  id: string;
+  full_name: string;
+  role: "admin" | "director" | "educator";
+  avatar_url: string | null;
+};
+
 const LOAD_ERROR = "No se pudieron cargar los niños.";
 
 const EMPTY_PANEL_DATA: ClassroomPanelData = {
@@ -76,7 +83,7 @@ export async function getClassroomPanelData(): Promise<ClassroomPanelData> {
       .order("created_at", { ascending: false })
       .order("full_name", { ascending: true }),
     supabase.from("classrooms").select("id, name, slug"),
-    supabase.from("profiles").select("id, full_name"),
+    supabase.rpc("list_active_staff_profiles"),
     supabase
       .from("child_health")
       .select(
@@ -100,8 +107,9 @@ export async function getClassroomPanelData(): Promise<ClassroomPanelData> {
   const classroomsById = new Map(
     classroomsResult.data.map((classroom) => [classroom.id, classroom]),
   );
+  const staffProfiles: StaffProfileRow[] = profilesResult.data ?? [];
   const profilesById = new Map(
-    profilesResult.data.map((profile) => [profile.id, profile]),
+    staffProfiles.map((profile) => [profile.id, profile]),
   );
   const healthByChildId = new Map(
     healthResult.data.map((health) => [health.child_id, health]),
