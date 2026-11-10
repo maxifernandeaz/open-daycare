@@ -69,6 +69,7 @@ export default function PostForm({ options }: PostFormProps) {
         body,
         category,
         classroomId: classroomValue.length > 0 ? classroomValue : null,
+        imageTypes: [],
       });
 
       if (!result.ok) {

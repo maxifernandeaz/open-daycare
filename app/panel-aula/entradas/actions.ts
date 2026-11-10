@@ -11,6 +11,8 @@ import {
   type SupabaseServerClient,
 } from "./queries";
 
+export type PostImageMime = "image/jpeg" | "image/png" | "image/webp";
+
 export type UploadTarget = {
   path: string;
   token: string;
@@ -21,6 +23,7 @@ export type PostFormInput = {
   body: string;
   category: PostCategory | null;
   classroomId: string | null;
+  imageTypes: PostImageMime[];
 };
 
 export type CreatePostResult =
@@ -34,6 +37,18 @@ export type CreatePostResult =
 
 const TITLE_MAX_LENGTH = 120;
 const BODY_MAX_LENGTH = 5000;
+const MAX_POST_IMAGES = 4;
+const POST_IMAGES_BUCKET = "post-images";
+
+const IMAGE_EXTENSIONS = {
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+} satisfies Record<PostImageMime, string>;
+
+const IMAGE_MIME_SET: ReadonlySet<string> = new Set(
+  Object.keys(IMAGE_EXTENSIONS),
+);
 
 const TITLE_REQUIRED_ERROR = "El título es obligatorio.";
 const TITLE_TOO_LONG_ERROR = `El título no puede superar los ${TITLE_MAX_LENGTH} caracteres.`;
@@ -47,6 +62,11 @@ const NO_CLASSROOMS_ERROR = "No tenés aulas asignadas para publicar.";
 const PERMISSION_ERROR = "No tenés permiso para publicar.";
 const CREATE_ERROR =
   "No se pudo publicar la entrada. Intentá nuevamente en unos minutos.";
+const IMAGES_LIMIT_ERROR = "Podés adjuntar hasta 4 imágenes.";
+const IMAGE_TYPE_INVALID_ERROR =
+  "Formato de imagen no permitido. Usá JPG, PNG o WebP.";
+const IMAGE_SIGN_WARNING =
+  "La entrada se publicó, pero no se pudieron preparar todas las imágenes. Podés agregar las que faltan desde Editar.";
 
 const POST_CATEGORY_SET: ReadonlySet<string> = new Set(POST_CATEGORY_VALUES);
 
@@ -75,6 +95,12 @@ export async function createPost(
 
   if (!isPostCategory(input.category)) {
     return { ok: false, error: CATEGORY_INVALID_ERROR };
+  }
+
+  const imageTypes = resolveImageTypes(input.imageTypes);
+
+  if (!imageTypes.ok) {
+    return { ok: false, error: imageTypes.error };
   }
 
   const profile = await getCurrentProfile();
@@ -106,10 +132,76 @@ export async function createPost(
     return { ok: false, error: CREATE_ERROR };
   }
 
+  const uploadTargets = await createUploadTargets(
+    supabase,
+    created.id,
+    imageTypes.imageTypes,
+  );
+
   revalidatePath("/");
   revalidatePath("/panel-aula/entradas");
 
-  return { ok: true, postId: created.id, uploadTargets: [] };
+  return {
+    ok: true,
+    postId: created.id,
+    uploadTargets: uploadTargets.targets,
+    ...(uploadTargets.failed ? { warning: IMAGE_SIGN_WARNING } : {}),
+  };
+}
+
+type ImageTypesResolution =
+  | { ok: true; imageTypes: PostImageMime[] }
+  | { ok: false; error: string };
+
+function resolveImageTypes(value: unknown): ImageTypesResolution {
+  if (!Array.isArray(value)) {
+    return { ok: false, error: IMAGE_TYPE_INVALID_ERROR };
+  }
+
+  if (value.length > MAX_POST_IMAGES) {
+    return { ok: false, error: IMAGES_LIMIT_ERROR };
+  }
+
+  const imageTypes: PostImageMime[] = [];
+
+  for (const item of value) {
+    if (!isPostImageMime(item)) {
+      return { ok: false, error: IMAGE_TYPE_INVALID_ERROR };
+    }
+
+    imageTypes.push(item);
+  }
+
+  return { ok: true, imageTypes };
+}
+
+type UploadTargetsResult = {
+  targets: UploadTarget[];
+  failed: boolean;
+};
+
+async function createUploadTargets(
+  supabase: SupabaseServerClient,
+  postId: string,
+  imageTypes: PostImageMime[],
+): Promise<UploadTargetsResult> {
+  const targets: UploadTarget[] = [];
+
+  for (const mime of imageTypes) {
+    const extension = IMAGE_EXTENSIONS[mime];
+    const path = `${postId}/${crypto.randomUUID()}.${extension}`;
+    const { data, error } = await supabase.storage
+      .from(POST_IMAGES_BUCKET)
+      .createSignedUploadUrl(path);
+
+    if (error || !data) {
+      return { targets, failed: true };
+    }
+
+    targets.push({ path, token: data.token });
+  }
+
+  return { targets, failed: false };
 }
 
 type ClassroomResolution =
@@ -181,6 +273,10 @@ function normalizeClassroomId(value: string | null): string | null {
   const trimmed = value.trim();
 
   return trimmed.length > 0 ? trimmed : null;
+}
+
+function isPostImageMime(value: unknown): value is PostImageMime {
+  return typeof value === "string" && IMAGE_MIME_SET.has(value);
 }
 
 function isPostCategory(value: unknown): value is PostCategory | null {
