@@ -12,11 +12,17 @@ import OpsHero from "@/app/components/panel-aula/OpsHero";
 import PickupQueuePanel from "@/app/components/panel-aula/PickupQueuePanel";
 import StudentRoster from "@/app/components/panel-aula/StudentRoster";
 import { MAIN_TOP_CLASS, SIDEBAR_OFFSET_CLASS } from "@/app/components/panel-aula/shell";
-import { requireStaff } from "@/utils/auth";
+import { requireStaff, type CurrentProfile } from "@/utils/auth";
 import { getClassroomPanelData } from "./queries";
 
 const PUBLICATIONS_LINK_CLASSES =
   "inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface-container-lowest shadow-sm text-on-surface font-label-lg text-label-lg hover:bg-surface-container transition-colors";
+
+const INVITE_ROLES: ReadonlySet<CurrentProfile["role"]> = new Set([
+  "admin",
+  "director",
+  "educator",
+]);
 
 export const metadata: Metadata = {
   title: "KiddiCare · Panel de Aula",
@@ -25,13 +31,9 @@ export const metadata: Metadata = {
 };
 
 export default async function PanelAulaPage() {
-  const profile = await requireStaff();
-  const canInvite =
-    profile.role === "admin" ||
-    profile.role === "director" ||
-    profile.role === "educator";
-  const { students, protocols, totalChildren, error } =
-    await getClassroomPanelData();
+  const [profile, { students, protocols, totalChildren, error }] =
+    await Promise.all([requireStaff(), getClassroomPanelData()]);
+  const canInvite = INVITE_ROLES.has(profile.role);
 
   return (
     <>

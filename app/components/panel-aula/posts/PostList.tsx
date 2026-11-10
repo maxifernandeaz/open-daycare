@@ -1,3 +1,4 @@
+import Link from "next/link";
 import Icon from "@/app/components/Icons";
 import type { StaffPostsData } from "@/app/panel-aula/entradas/queries";
 import PostCard from "./PostCard";
@@ -45,10 +46,13 @@ export default function PostList({ data }: PostListProps) {
       {data.page > 1 || data.hasMore ? (
         <nav aria-label="Paginación de publicaciones" className={PAGINATION_CLASSES}>
           {data.page > 1 ? (
-            <a className={PAGE_LINK_CLASSES} href={`/panel-aula/entradas?page=${previousPage}`}>
+            <Link
+              className={PAGE_LINK_CLASSES}
+              href={`/panel-aula/entradas?page=${previousPage}`}
+            >
               <Icon name="chevron_left" size={18} />
               <span>Anteriores</span>
-            </a>
+            </Link>
           ) : (
             <span />
           )}
@@ -58,10 +62,13 @@ export default function PostList({ data }: PostListProps) {
           </span>
 
           {data.hasMore ? (
-            <a className={PAGE_LINK_CLASSES} href={`/panel-aula/entradas?page=${nextPage}`}>
+            <Link
+              className={PAGE_LINK_CLASSES}
+              href={`/panel-aula/entradas?page=${nextPage}`}
+            >
               <span>Siguientes</span>
               <Icon name="chevron_right" size={18} />
-            </a>
+            </Link>
           ) : (
             <span />
           )}

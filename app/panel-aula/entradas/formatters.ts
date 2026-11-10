@@ -1,20 +1,20 @@
 import type { PostCategory } from "./queries";
 
-const CATEGORY_LABELS: Record<PostCategory, string> = {
+const CATEGORY_LABELS = {
   actividad: "Actividad",
   aviso: "Aviso",
   menu: "Menú",
   foto: "Foto",
   espacio: "Espacio",
-};
+} satisfies Record<PostCategory, string>;
 
-export const POST_CATEGORY_VALUES: readonly PostCategory[] = [
+export const POST_CATEGORY_VALUES: readonly PostCategory[] = Object.freeze([
   "actividad",
   "aviso",
   "menu",
   "foto",
   "espacio",
-];
+]);
 
 const POST_DATE_FORMATTER = new Intl.DateTimeFormat("es", {
   dateStyle: "long",

@@ -2,10 +2,14 @@
 
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
-import { getCurrentProfile } from "@/utils/auth";
+import { getCurrentProfile, type CurrentProfile } from "@/utils/auth";
 import { createClient } from "@/utils/supabase/server";
 import { POST_CATEGORY_VALUES } from "./formatters";
-import { isManagerRole, type PostCategory } from "./queries";
+import {
+  isManagerRole,
+  type PostCategory,
+  type SupabaseServerClient,
+} from "./queries";
 
 export type UploadTarget = {
   path: string;
@@ -44,6 +48,8 @@ const PERMISSION_ERROR = "No tenés permiso para publicar.";
 const CREATE_ERROR =
   "No se pudo publicar la entrada. Intentá nuevamente en unos minutos.";
 
+const POST_CATEGORY_SET: ReadonlySet<string> = new Set(POST_CATEGORY_VALUES);
+
 export async function createPost(
   input: PostFormInput,
 ): Promise<CreatePostResult> {
@@ -78,53 +84,10 @@ export async function createPost(
   }
 
   const supabase = createClient(await cookies());
-  const isManager = isManagerRole(profile.role);
+  const classroom = await resolveClassroomId(supabase, profile, classroomId);
 
-  if (!isManager) {
-    if (classroomId === null) {
-      return { ok: false, error: CLASSROOM_REQUIRED_ERROR };
-    }
-
-    const { data: assignment, error: assignmentError } = await supabase
-      .from("classroom_educators")
-      .select("classroom_id")
-      .eq("educator_id", profile.id)
-      .eq("classroom_id", classroomId)
-      .maybeSingle();
-
-    if (assignmentError) {
-      return { ok: false, error: CLASSROOM_FORBIDDEN_ERROR };
-    }
-
-    if (!assignment) {
-      const { count, error: countError } = await supabase
-        .from("classroom_educators")
-        .select("classroom_id", { count: "exact", head: true })
-        .eq("educator_id", profile.id);
-
-      if (countError) {
-        return { ok: false, error: CLASSROOM_FORBIDDEN_ERROR };
-      }
-
-      return {
-        ok: false,
-        error: count === 0 ? NO_CLASSROOMS_ERROR : CLASSROOM_FORBIDDEN_ERROR,
-      };
-    }
-  } else if (classroomId !== null) {
-    const { data: classroom, error: classroomError } = await supabase
-      .from("classrooms")
-      .select("id")
-      .eq("id", classroomId)
-      .maybeSingle();
-
-    if (classroomError) {
-      return { ok: false, error: CLASSROOM_INVALID_ERROR };
-    }
-
-    if (!classroom) {
-      return { ok: false, error: CLASSROOM_INVALID_ERROR };
-    }
+  if (!classroom.ok) {
+    return { ok: false, error: classroom.error };
   }
 
   const { data: created, error: insertError } = await supabase
@@ -134,7 +97,7 @@ export async function createPost(
       title,
       body,
       category: input.category,
-      classroom_id: classroomId,
+      classroom_id: classroom.classroomId,
     })
     .select("id")
     .single();
@@ -147,6 +110,67 @@ export async function createPost(
   revalidatePath("/panel-aula/entradas");
 
   return { ok: true, postId: created.id, uploadTargets: [] };
+}
+
+type ClassroomResolution =
+  | { ok: true; classroomId: string | null }
+  | { ok: false; error: string };
+
+async function resolveClassroomId(
+  supabase: SupabaseServerClient,
+  profile: CurrentProfile,
+  requestedClassroomId: string | null,
+): Promise<ClassroomResolution> {
+  if (isManagerRole(profile.role)) {
+    if (requestedClassroomId === null) {
+      return { ok: true, classroomId: null };
+    }
+
+    const { data: classroom, error } = await supabase
+      .from("classrooms")
+      .select("id")
+      .eq("id", requestedClassroomId)
+      .maybeSingle();
+
+    if (error || !classroom) {
+      return { ok: false, error: CLASSROOM_INVALID_ERROR };
+    }
+
+    return { ok: true, classroomId: requestedClassroomId };
+  }
+
+  if (requestedClassroomId === null) {
+    return { ok: false, error: CLASSROOM_REQUIRED_ERROR };
+  }
+
+  const { data: assignment, error: assignmentError } = await supabase
+    .from("classroom_educators")
+    .select("classroom_id")
+    .eq("educator_id", profile.id)
+    .eq("classroom_id", requestedClassroomId)
+    .maybeSingle();
+
+  if (assignmentError) {
+    return { ok: false, error: CLASSROOM_FORBIDDEN_ERROR };
+  }
+
+  if (assignment) {
+    return { ok: true, classroomId: requestedClassroomId };
+  }
+
+  const { count, error: countError } = await supabase
+    .from("classroom_educators")
+    .select("classroom_id", { count: "exact", head: true })
+    .eq("educator_id", profile.id);
+
+  if (countError) {
+    return { ok: false, error: CLASSROOM_FORBIDDEN_ERROR };
+  }
+
+  return {
+    ok: false,
+    error: count === 0 ? NO_CLASSROOMS_ERROR : CLASSROOM_FORBIDDEN_ERROR,
+  };
 }
 
 function normalizeClassroomId(value: string | null): string | null {
@@ -164,5 +188,5 @@ function isPostCategory(value: unknown): value is PostCategory | null {
     return true;
   }
 
-  return POST_CATEGORY_VALUES.some((category) => category === value);
+  return typeof value === "string" && POST_CATEGORY_SET.has(value);
 }
