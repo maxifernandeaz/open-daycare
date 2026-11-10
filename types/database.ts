@@ -487,6 +487,92 @@ export type Database = {
           },
         ]
       }
+      post_images: {
+        Row: {
+          alt_text: string | null
+          created_at: string
+          id: string
+          post_id: string
+          sort_order: number
+          storage_path: string
+        }
+        Insert: {
+          alt_text?: string | null
+          created_at?: string
+          id?: string
+          post_id: string
+          sort_order?: number
+          storage_path: string
+        }
+        Update: {
+          alt_text?: string | null
+          created_at?: string
+          id?: string
+          post_id?: string
+          sort_order?: number
+          storage_path?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_images_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      posts: {
+        Row: {
+          author_id: string | null
+          author_name: string
+          body: string
+          category: Database["public"]["Enums"]["post_category"] | null
+          classroom_id: string | null
+          created_at: string
+          id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author_id?: string | null
+          author_name?: string
+          body: string
+          category?: Database["public"]["Enums"]["post_category"] | null
+          classroom_id?: string | null
+          created_at?: string
+          id?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string | null
+          author_name?: string
+          body?: string
+          category?: Database["public"]["Enums"]["post_category"] | null
+          classroom_id?: string | null
+          created_at?: string
+          id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "posts_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "posts_classroom_id_fkey"
+            columns: ["classroom_id"]
+            isOneToOne: false
+            referencedRelation: "classrooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -538,6 +624,11 @@ export type Database = {
         Args: { p_code: string; p_photo_consent?: boolean }
         Returns: string
       }
+      can_staff_access_child: { Args: { p_child_id: string }; Returns: boolean }
+      count_children_without_photo_consent: {
+        Args: { p_classroom_id?: string }
+        Returns: number
+      }
       create_child: {
         Args: {
           p_allergy_codes: string[]
@@ -578,6 +669,24 @@ export type Database = {
       is_active_admin: { Args: never; Returns: boolean }
       is_active_manager: { Args: never; Returns: boolean }
       is_active_staff: { Args: never; Returns: boolean }
+      is_assigned_educator: {
+        Args: { p_classroom_id: string }
+        Returns: boolean
+      }
+      is_linked_tutor: { Args: { p_child_id: string }; Returns: boolean }
+      is_tutor_of_classroom: {
+        Args: { p_classroom_id: string }
+        Returns: boolean
+      }
+      list_active_staff_profiles: {
+        Args: never
+        Returns: {
+          avatar_url: string
+          full_name: string
+          id: string
+          role: Database["public"]["Enums"]["user_role"]
+        }[]
+      }
       revoke_tutor_invitation: {
         Args: { p_invitation_id: string }
         Returns: undefined
@@ -586,6 +695,7 @@ export type Database = {
     Enums: {
       gender: "boy" | "girl" | "other"
       invitation_status: "pending" | "accepted" | "revoked" | "expired"
+      post_category: "actividad" | "aviso" | "menu" | "foto" | "espacio"
       schedule:
         | "full_day"
         | "mornings_with_lunch"
@@ -608,12 +718,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -637,11 +747,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -662,11 +772,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -687,11 +797,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -704,11 +814,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -722,6 +832,7 @@ export const Constants = {
     Enums: {
       gender: ["boy", "girl", "other"],
       invitation_status: ["pending", "accepted", "revoked", "expired"],
+      post_category: ["actividad", "aviso", "menu", "foto", "espacio"],
       schedule: [
         "full_day",
         "mornings_with_lunch",

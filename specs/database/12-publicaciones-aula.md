@@ -1,6 +1,6 @@
 # SPEC 12 — Publicaciones de Aula y Galería de Imágenes (Datos)
 
-> **Estado:** approved
+> **Estado:** implemented
 > **Depende de:** SPEC 05, SPEC 06, SPEC 08, SPEC 10
 > **Fecha:** 2026-11-09
 > **Objetivo:** Crear en Supabase las tablas `posts` y `post_images`, el bucket privado `post-images`, sus policies RLS y el RPC de conteo de consentimiento que soportan las publicaciones del staff y su lectura por las familias.
@@ -29,6 +29,8 @@ Este spec resuelve solo la capa de datos: tablas, constraints, bucket, RLS y RPC
   - Policies de `storage.objects` para el bucket `post-images`: `SELECT`, `INSERT` y `DELETE` para `authenticated`; sin `UPDATE` y sin `anon`.
   - RPC `public.count_children_without_photo_consent(p_classroom_id uuid default null)` (`security definer`, `stable`, `search_path = ''`) que devuelve solo un entero.
   - Grants explícitos: `authenticated` con DML sobre las dos tablas; `anon` sin privilegios de tabla; el RPC solo ejecutable por `authenticated`.
+- Migración de hardening `supabase/migrations/<timestamp>_harden_count_children_without_photo_consent_grants.sql`:
+  - `revoke all on function public.count_children_without_photo_consent(uuid) from anon`, porque Supabase concede `EXECUTE` a `anon` por privilegios por defecto y `revoke ... from public` no elimina ese grant explícito.
 - Regenerar `types/database.ts` vía MCP después de aplicar la migración.
 - Verificación estructural con `supabase_list_migrations`, `list_tables`, `pg_constraint`, `pg_indexes`, `pg_policies`, `pg_proc` y `information_schema`.
 
@@ -69,7 +71,7 @@ create table public.posts (
   id uuid primary key default gen_random_uuid(),
   classroom_id uuid references public.classrooms (id) on delete cascade,
   author_id uuid references public.profiles (id) on delete set null,
-  author_name text not null,
+  author_name text not null default '',
   title text not null,
   body text not null,
   category public.post_category,
@@ -490,16 +492,16 @@ $$;
 ### Grants
 
 ```sql
-revoke all on table public.posts from anon;
-revoke all on table public.post_images from anon;
+revoke all on table public.posts from anon, authenticated;
+revoke all on table public.post_images from anon, authenticated;
 grant select, insert, update, delete on table public.posts to authenticated;
 grant select, insert, update, delete on table public.post_images to authenticated;
 
-revoke all on function public.count_children_without_photo_consent(uuid) from public;
+revoke all on function public.count_children_without_photo_consent(uuid) from public, anon;
 grant execute on function public.count_children_without_photo_consent(uuid) to authenticated;
 ```
 
-`posts_set_author_name` no se expone como RPC útil: es una función de trigger y una llamada directa falla porque no puede ejecutarse fuera de un trigger.
+Se revocan todos los privilegios por defecto (`truncate`, `references`, `trigger`, etc.) de `anon` y `authenticated` antes de otorgar solo DML a `authenticated`, siguiendo el estándar de las migraciones de seguridad previas. En el RPC se revoca también `anon`: Supabase concede `EXECUTE` a `anon` por privilegios por defecto y `revoke ... from public` no elimina ese grant, así que la migración de hardening lo revoca explícitamente para dejar solo `authenticated` (y `service_role` como rol de backend). `posts_set_author_name` no se expone como RPC útil: es una función de trigger y una llamada directa falla porque no puede ejecutarse fuera de un trigger.
 
 ### Contratos TypeScript
 
@@ -524,7 +526,7 @@ export type CountChildrenWithoutPhotoConsentResult = number;
 
 1. **Spec.** Escribir este documento y dejarlo en `Borrador` → `Aprobado`. Verificar: revisión del usuario.
 2. **Rama.** Crear y cambiar a `spec-12-publicaciones-aula`. Verificar: `git branch --show-current`.
-3. **Migración.** Crear `<timestamp>_classroom_posts_and_images.sql` con el enum, las dos tablas, los constraints, los índices, los dos triggers, el bucket, las policies de `public` y `storage`, el RPC y los grants. Verificar: revisión del SQL.
+3. **Migración.** Crear `<timestamp>_classroom_posts_and_images.sql` con el enum, las dos tablas, los constraints, los índices, los dos triggers, el bucket, las policies de `public` y `storage`, el RPC y los grants. Crear además `<timestamp>_harden_count_children_without_photo_consent_grants.sql` con el `revoke ... from anon` del RPC. Verificar: revisión del SQL.
 4. **Aplicar.** Aplicar con MCP `apply_migration` y comprobar `list_migrations` y `list_tables`. Verificar: `posts`, `post_images` y `post_category` existen.
 5. **Verificar estructura.** Consultar `information_schema.columns`, `pg_constraint`, `pg_indexes` y `pg_trigger`. Verificar: columnas, checks, FKs, índices, unicidad `(post_id, sort_order)` y los dos triggers.
 6. **Verificar bucket.** Consultar `storage.buckets` por `id = 'post-images'`. Verificar: `public = false`, `file_size_limit = 5242880`, `allowed_mime_types` con los tres tipos en ese orden.
@@ -540,7 +542,7 @@ export type CountChildrenWithoutPhotoConsentResult = number;
 - [ ] La migración `<timestamp>_classroom_posts_and_images` aparece en `supabase_list_migrations`.
 - [ ] El enum `public.post_category` existe con `actividad`, `aviso`, `menu`, `foto`, `espacio` en ese orden.
 - [ ] `public.posts` existe con las 9 columnas del Data model y FKs a `classrooms` (`on delete cascade`) y `profiles` (`on delete set null`).
-- [ ] `posts.title` y `posts.body` tienen los checks de longitud con `btrim`; `posts.author_name` tiene el check de 1 a 120 caracteres.
+- [ ] `posts.title` y `posts.body` tienen los checks de longitud con `btrim`; `posts.author_name` tiene el check de 1 a 120 caracteres y `default ''`.
 - [ ] Existen los índices `posts_created_at_idx`, `posts_classroom_created_at_idx` y `posts_author_id_idx`.
 - [ ] El trigger `posts_set_author_name` se dispara en `insert or update of author_id` y copia `profiles.full_name`; un `author_id` inexistente hace fallar el insert y un `author_id` nulo en `INSERT` también falla.
 - [ ] `on delete set null` sobre `posts.author_id` no falla: el trigger conserva `author_name` cuando `author_id` pasa a `null` en un `UPDATE`.
@@ -561,11 +563,22 @@ export type CountChildrenWithoutPhotoConsentResult = number;
 - [ ] `public.count_children_without_photo_consent(uuid)` existe, es `security definer`, `stable`, tiene `search_path = ''` y devuelve `integer`.
 - [ ] El RPC exige `is_active_staff()`, exige manager para `p_classroom_id is null` y exige manager o `is_assigned_educator(p_classroom_id)` para un aula concreta.
 - [ ] El RPC cuenta con `not exists (select 1 from public.child_tutors ct where ct.child_id = c.id and ct.photo_consent = true)`.
-- [ ] `anon` no tiene privilegios de tabla sobre `posts` ni `post_images`; `authenticated` tiene `select, insert, update, delete` en ambas.
-- [ ] El RPC tiene `execute` solo para `authenticated`; `public` no puede ejecutarlo.
+- [ ] `anon` no tiene privilegios de tabla sobre `posts` ni `post_images`; `authenticated` tiene solo `select, insert, update, delete` en ambas (sin `truncate`, `references` ni `trigger`).
+- [ ] El RPC tiene `execute` solo para `authenticated` (más `service_role` como backend); `public` y `anon` no pueden ejecutarlo.
 - [ ] `types/database.ts` incluye `post_category`, `posts`, `post_images` y el RPC; `npx tsc --noEmit` pasa.
 - [ ] `supabase_get_advisors` no reporta ningún `ERROR`; los `WARN`/`INFO` quedan documentados.
 - [ ] `git diff --name-only` solo muestra la migración, `types/database.ts` y este spec; no hay cambios en `app/`, `data/` ni en otros specs.
+
+## Verification results
+
+- Migraciones aplicadas: `20261110115349_classroom_posts_and_images` y `20261110115532_harden_count_children_without_photo_consent_grants`.
+- Estructura verificada en remoto: enum (orden correcto), 9 columnas en `posts` y 6 en `post_images`, checks, FKs (`cascade`/`set null`), índices, triggers, bucket privado, 4 + 4 + 3 policies `to authenticated` y RPC (`security definer`, `stable`, `search_path = ''`).
+- Trigger `posts_set_author_name` probado con `DO` + `RAISE` (rollback implícito, sin residuos): copia `full_name`, falla con autor inexistente (`23503`), falla con autor nulo en `INSERT` (`23502`) y conserva `author_name` al pasar `author_id` a `null` en `UPDATE`.
+- Grants: `anon` sin privilegios de tabla; `authenticated` solo DML. RPC con `EXECUTE` solo para `authenticated` y `service_role` (se revocó `anon` en la migración de hardening).
+- `types/database.ts` regenerado; `npx tsc --noEmit` limpio; `npm run build` correcto.
+- `npm run lint` falla solo por un error preexistente y ajeno a este spec en `app/components/PokemonViewer.tsx:68` (`react-hooks/set-state-in-effect`), ya presente en `main`.
+- `supabase_get_advisors` (security): sin `ERROR`. `WARN` preexistentes: ejecución de `SECURITY DEFINER` por `anon` (`get_invitation_preview`, `rls_auto_enable`), por `authenticated` (helpers y RPCs, incluido el nuevo RPC por diseño) y Leaked Password Protection deshabilitado.
+- `supabase_get_advisors` (performance): sin `ERROR`. `INFO`: índices nuevos aún sin uso (tablas vacías), FKs sin índice en `invitations` y múltiples policies permisivas en `children`/`child_health`/`child_allergies` (preexistentes).
 
 ## Decisions
 
@@ -574,6 +587,8 @@ export type CountChildrenWithoutPhotoConsentResult = number;
 - **Sí:** `classroom_id` nullable para “Todas las aulas”, con la restricción de manager en `INSERT` y `UPDATE`. El permiso vive en RLS, no en un constraint que no puede leer el rol.
 - **Sí:** `author_id` nullable con `on delete set null` y `author_name` desnormalizado. Conserva la entrada y su autor visible aunque se elimine el perfil; `profiles` solo es legible por el propio usuario o un manager, así que un join directo devolvería `null` a los tutores.
 - **Sí:** trigger `posts_set_author_name`. Evita confiar en el cliente para el nombre del autor y mantiene `author_name` coherente con `author_id`.
+- **Sí:** `author_name` con `default ''`. El trigger `BEFORE INSERT` siempre impone `profiles.full_name` y el check de longitud sigue rechazando cadenas vacías, pero el default hace que `types/database.ts` genere `author_name?: string` en `Insert` y evita que el cliente lo envíe.
+- **Sí:** `revoke all` a `anon` y `authenticated` antes de otorgar solo DML a `authenticated`. Sigue el estándar de las migraciones de seguridad previas y quita `truncate`, `references` y `trigger` heredados de los privilegios por defecto.
 - **Sí:** `unique (post_id, sort_order)` con `sort_order between 0 and 3`. Limita a cuatro imágenes por entrada sin un trigger de conteo y sin carreras.
 - **Sí:** check de formato de `storage_path` en la base de datos. La app también valida el prefijo, pero el check impide filas inconsistentes incluso con escrituras directas.
 - **Sí:** bucket privado y URLs firmadas. Las fotos de niños no deben quedar en un bucket público ni en una URL permanente.
