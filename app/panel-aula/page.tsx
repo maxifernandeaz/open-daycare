@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Icon from "@/app/components/Icons";
 import ActionDock from "@/app/components/panel-aula/ActionDock";
 import ActivityLogPanel from "@/app/components/panel-aula/ActivityLogPanel";
 import AppHeader from "@/app/components/panel-aula/AppHeader";
@@ -36,6 +37,18 @@ export default async function PanelAulaPage() {
         className={`relative ${MAIN_TOP_CLASS} ${SIDEBAR_OFFSET_CLASS} w-full bg-background min-h-screen font-body-md text-body-md`}
       >
         <div className="flex flex-col w-full px-8 pb-16 space-y-6">
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-6">
+            <p className="font-body-md text-body-md text-on-surface-variant">
+              Compartí novedades del aula con las familias.
+            </p>
+            <a
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface-container-lowest shadow-sm text-on-surface font-label-lg text-label-lg hover:bg-surface-container transition-colors"
+              href="/panel-aula/entradas"
+            >
+              <Icon className="text-primary" name="campaign" size={20} />
+              <span>Publicaciones</span>
+            </a>
+          </div>
           <OpsHero />
           <KpiRow totalChildren={totalChildren} />
           <ActionDock
