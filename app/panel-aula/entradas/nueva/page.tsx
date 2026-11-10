@@ -7,6 +7,8 @@ import {
   SIDEBAR_OFFSET_CLASS,
 } from "@/app/components/panel-aula/shell";
 import { requireStaff } from "@/utils/auth";
+import PostForm from "@/app/components/panel-aula/posts/PostForm";
+import { getPostFormOptions } from "../queries";
 
 export const metadata: Metadata = {
   title: "KiddiCare · Nueva Publicación",
@@ -14,7 +16,8 @@ export const metadata: Metadata = {
 };
 
 export default async function NuevaEntradaPage() {
-  await requireStaff();
+  const profile = await requireStaff();
+  const options = await getPostFormOptions(profile);
 
   return (
     <>
@@ -40,9 +43,7 @@ export default async function NuevaEntradaPage() {
             </p>
           </header>
 
-          <section className="rounded-xl bg-surface-container-lowest p-6 shadow-sm font-body-sm text-body-sm text-on-surface-variant">
-            El formulario de alta se habilita en el siguiente paso de la implementación.
-          </section>
+          <PostForm options={options} />
         </div>
       </main>
     </>

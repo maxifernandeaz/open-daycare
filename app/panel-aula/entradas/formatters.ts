@@ -8,6 +8,14 @@ const CATEGORY_LABELS: Record<PostCategory, string> = {
   espacio: "Espacio",
 };
 
+export const POST_CATEGORY_VALUES: readonly PostCategory[] = [
+  "actividad",
+  "aviso",
+  "menu",
+  "foto",
+  "espacio",
+];
+
 const POST_DATE_FORMATTER = new Intl.DateTimeFormat("es", {
   dateStyle: "long",
 });
