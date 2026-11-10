@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import Icon from "@/app/components/Icons";
 import AppHeader from "@/app/components/panel-aula/AppHeader";
@@ -54,20 +55,20 @@ export default async function EditarEntradaPage({
 
   return (
     <>
-        <AppSidebar activePath="publicaciones" />
-        <AppHeader />
+      <AppSidebar activePath="publicaciones" />
+      <AppHeader />
       <main
         className={`relative ${MAIN_TOP_CLASS} ${SIDEBAR_OFFSET_CLASS} w-full bg-background min-h-screen font-body-md text-body-md`}
       >
         <div className="flex flex-col w-full px-8 pt-6 pb-16 space-y-6">
           <header className="flex flex-col gap-1.5">
-            <a
+            <Link
               className="inline-flex items-center gap-1 font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors self-start"
               href="/panel-aula/entradas"
             >
               <Icon name="chevron_left" size={16} />
               <span>Volver a publicaciones</span>
-            </a>
+            </Link>
             <h1 className="font-headline-lg text-headline-lg text-on-surface tracking-tight">
               Editar publicación
             </h1>

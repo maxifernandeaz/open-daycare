@@ -8,8 +8,11 @@ export type SupabaseServerClient = ReturnType<typeof createClient>;
 
 export const STAFF_PAGE_SIZE = 20;
 export const FEED_PAGE_SIZE = 10;
+export const DEFAULT_PAGE = 1;
 
 const SIGNED_URL_TTL_SECONDS = 3600;
+const POST_IMAGES_BUCKET = "post-images";
+const MIN_TOTAL_PAGES = 1;
 const MANAGER_ROLES: ReadonlyArray<CurrentProfile["role"]> = [
   "admin",
   "director",
@@ -115,7 +118,7 @@ type EditablePostRow = {
 const EMPTY_STAFF_POSTS: StaffPostsData = {
   posts: [],
   imageUrls: {},
-  page: 1,
+  page: DEFAULT_PAGE,
   totalPages: 1,
   hasMore: false,
   error: null,
@@ -124,7 +127,7 @@ const EMPTY_STAFF_POSTS: StaffPostsData = {
 const EMPTY_FEED: FamilyFeedData = {
   posts: [],
   imageUrls: {},
-  page: 1,
+  page: DEFAULT_PAGE,
   hasMore: false,
   error: null,
 };
@@ -144,7 +147,7 @@ export async function signPostImages(
   }
 
   const { data, error } = await supabase.storage
-    .from("post-images")
+    .from(POST_IMAGES_BUCKET)
     .createSignedUrls(uniquePaths, SIGNED_URL_TTL_SECONDS);
 
   if (error || !data) {
@@ -193,7 +196,7 @@ export async function getStaffPosts(page: number): Promise<StaffPostsData> {
   }
 
   const total = result.count ?? 0;
-  const totalPages = Math.max(1, Math.ceil(total / STAFF_PAGE_SIZE));
+  const totalPages = Math.max(MIN_TOTAL_PAGES, Math.ceil(total / STAFF_PAGE_SIZE));
   const safePage = Math.min(requestedPage, totalPages);
 
   if (safePage !== requestedPage) {
@@ -380,7 +383,7 @@ export async function getFamilyFeed(page: number): Promise<FamilyFeedData> {
   }
 
   const total = result.count ?? 0;
-  const totalPages = Math.max(1, Math.ceil(total / FEED_PAGE_SIZE));
+  const totalPages = Math.max(MIN_TOTAL_PAGES, Math.ceil(total / FEED_PAGE_SIZE));
   const safePage = Math.min(requestedPage, totalPages);
 
   if (safePage !== requestedPage) {
@@ -560,10 +563,10 @@ function canEditPost(
 
 function normalizeRequestedPage(page: number): number {
   if (!Number.isFinite(page)) {
-    return 1;
+    return DEFAULT_PAGE;
   }
 
   const floored = Math.floor(page);
 
-  return floored < 1 ? 1 : floored;
+  return floored < DEFAULT_PAGE ? DEFAULT_PAGE : floored;
 }

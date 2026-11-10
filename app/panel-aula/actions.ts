@@ -1,12 +1,16 @@
 "use server";
 
 import { cookies } from "next/headers";
+import type { Database } from "@/types/database";
 import { sendInvitationEmail } from "@/utils/email";
 import { createClient } from "@/utils/supabase/server";
 
 export type InviteFamilyResult =
   | { success: true; emailSent: boolean; code: string }
   | { success: false; error: string };
+
+type TutorInvitation =
+  Database["public"]["Functions"]["create_tutor_invitation"]["Returns"][number];
 
 const GENERIC_ERROR =
   "No se pudo crear la invitación. Intentá nuevamente en unos minutos.";
@@ -48,7 +52,7 @@ export async function inviteFamily(
     return { success: false, error: error.message || GENERIC_ERROR };
   }
 
-  const invitation = data?.[0];
+  const invitation: TutorInvitation | undefined = data?.[0];
 
   if (!invitation) {
     return { success: false, error: GENERIC_ERROR };

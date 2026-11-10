@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import Icon from "@/app/components/Icons";
 import ActionDock from "@/app/components/panel-aula/ActionDock";
 import ActivityLogPanel from "@/app/components/panel-aula/ActivityLogPanel";
@@ -13,6 +14,9 @@ import StudentRoster from "@/app/components/panel-aula/StudentRoster";
 import { MAIN_TOP_CLASS, SIDEBAR_OFFSET_CLASS } from "@/app/components/panel-aula/shell";
 import { requireStaff } from "@/utils/auth";
 import { getClassroomPanelData } from "./queries";
+
+const PUBLICATIONS_LINK_CLASSES =
+  "inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface-container-lowest shadow-sm text-on-surface font-label-lg text-label-lg hover:bg-surface-container transition-colors";
 
 export const metadata: Metadata = {
   title: "KiddiCare · Panel de Aula",
@@ -41,13 +45,13 @@ export default async function PanelAulaPage() {
             <p className="font-body-md text-body-md text-on-surface-variant">
               Compartí novedades del aula con las familias.
             </p>
-            <a
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface-container-lowest shadow-sm text-on-surface font-label-lg text-label-lg hover:bg-surface-container transition-colors"
+            <Link
+              className={PUBLICATIONS_LINK_CLASSES}
               href="/panel-aula/entradas"
             >
               <Icon className="text-primary" name="campaign" size={20} />
               <span>Publicaciones</span>
-            </a>
+            </Link>
           </div>
           <OpsHero />
           <KpiRow totalChildren={totalChildren} />

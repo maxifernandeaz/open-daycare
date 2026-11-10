@@ -7,6 +7,11 @@ const SCHEDULE_LABELS: Record<string, string> = {
   afternoon: "Solo tardes",
 };
 
+const MONTHS_PER_YEAR = 12;
+const MAX_AGE_MONTHS_FOR_MONTHS_LABEL = 36;
+const MAX_INITIALS = 2;
+const NO_SCHEDULE_LABEL = "Sin horario";
+
 const CREATED_AT_FORMATTER = new Intl.DateTimeFormat("es-ES", {
   day: "numeric",
   month: "short",
@@ -17,14 +22,15 @@ export function getAgeLabel(birthDate: string): string {
   const [birthYear, birthMonth] = birthDate.split("-").map(Number);
   const now = new Date();
   const months =
-    (now.getFullYear() - birthYear) * 12 + (now.getMonth() + 1 - birthMonth);
+    (now.getFullYear() - birthYear) * MONTHS_PER_YEAR +
+    (now.getMonth() + 1 - birthMonth);
 
-  if (months < 36) {
+  if (months < MAX_AGE_MONTHS_FOR_MONTHS_LABEL) {
     return `${months} meses`;
   }
 
-  const years = Math.floor(months / 12);
-  const remainingMonths = months % 12;
+  const years = Math.floor(months / MONTHS_PER_YEAR);
+  const remainingMonths = months % MONTHS_PER_YEAR;
 
   return remainingMonths > 0
     ? `${years} años ${remainingMonths} m`
@@ -36,7 +42,7 @@ export function getInitials(name: string): string {
     .trim()
     .split(/\s+/)
     .filter(Boolean)
-    .slice(0, 2)
+    .slice(0, MAX_INITIALS)
     .map((word) => word[0]?.toUpperCase() ?? "")
     .join("");
 }
@@ -47,10 +53,10 @@ export function formatCreatedAt(value: string): string {
 
 export function getScheduleLabel(schedule: string | null): string {
   if (!schedule) {
-    return "Sin horario";
+    return NO_SCHEDULE_LABEL;
   }
 
-  return SCHEDULE_LABELS[schedule] ?? "Sin horario";
+  return SCHEDULE_LABELS[schedule] ?? NO_SCHEDULE_LABEL;
 }
 
 export function getAllergyLabels(

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import Icon from "@/app/components/Icons";
 import AppHeader from "@/app/components/panel-aula/AppHeader";
 import AppSidebar from "@/app/components/panel-aula/AppSidebar";
@@ -8,7 +9,7 @@ import {
   SIDEBAR_OFFSET_CLASS,
 } from "@/app/components/panel-aula/shell";
 import { requireStaff } from "@/utils/auth";
-import { getStaffPosts } from "./queries";
+import { DEFAULT_PAGE, getStaffPosts } from "./queries";
 
 export const metadata: Metadata = {
   title: "KiddiCare · Publicaciones de Aula",
@@ -27,12 +28,12 @@ function parsePage(value: string | string[] | undefined): number {
   const rawValue = Array.isArray(value) ? value[0] : value;
 
   if (!rawValue) {
-    return 1;
+    return DEFAULT_PAGE;
   }
 
   const parsed = Number.parseInt(rawValue, 10);
 
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : DEFAULT_PAGE;
 }
 
 export default async function EntradasPage({
@@ -60,10 +61,13 @@ export default async function EntradasPage({
                 Compartí actividades, avisos, menús y fotos con las familias.
               </p>
             </div>
-            <a className={`${NEW_POST_CLASSES} self-start md:self-auto shrink-0`} href="/panel-aula/entradas/nueva">
+            <Link
+              className={`${NEW_POST_CLASSES} self-start md:self-auto shrink-0`}
+              href="/panel-aula/entradas/nueva"
+            >
               <Icon name="add" size={20} />
               <span>Nueva publicación</span>
-            </a>
+            </Link>
           </header>
 
           <PostList data={data} />
