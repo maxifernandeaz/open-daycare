@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
-import AuthField from "@/app/components/auth/AuthField";
+import { cookies } from "next/headers";
+import ActivateAccountForm from "@/app/components/auth/ActivateAccountForm";
 import BrandLockup from "@/app/components/auth/BrandLockup";
-import Icon from "@/app/components/Icons";
-import { activationScreen } from "@/data/mock-auth";
+import { activationScreen, type AuthFieldData } from "@/data/mock-auth";
+import { createClient } from "@/utils/supabase/server";
 
 export const metadata: Metadata = {
   title: "KiddiCare · Activar cuenta",
@@ -26,22 +27,68 @@ const CHILD_AVATAR_CLASSES =
 const CHILD_LABEL_CLASSES =
   "mb-1 text-body-sm leading-tight text-on-surface-variant";
 const CHILD_NAME_CLASSES = "font-headline-sm text-headline-sm text-on-surface";
-const FORM_CLASSES = "w-full space-y-5";
-const CONSENT_BANNER_CLASSES =
-  "flex w-full items-start gap-3 rounded-xl border border-tertiary-fixed bg-tertiary-fixed/30 p-3.5 sm:items-center sm:p-4";
-const CONSENT_CONTROL_CLASSES =
-  "relative flex w-full cursor-pointer select-none items-start gap-3 sm:items-center";
-const CONSENT_BOX_CLASSES =
-  "flex h-6 w-6 shrink-0 items-center justify-center rounded-md border border-outline bg-surface-container-lowest text-transparent transition-colors peer-checked:border-primary peer-checked:bg-primary peer-checked:text-on-primary peer-focus:ring-2 peer-focus:ring-primary peer-focus:ring-offset-2 peer-focus:ring-offset-background";
-const CONSENT_TEXT_CLASSES =
-  "cursor-pointer select-none text-body-md leading-snug text-on-surface-variant";
-const SUBMIT_CLASSES =
-  "w-full rounded-2xl bg-primary px-6 py-4 font-label-lg text-label-lg text-on-primary shadow-[0_4px_14px_rgba(16,185,129,0.25)] transition-all duration-200 ease-in-out hover:bg-on-primary-container focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background active:scale-[0.99]";
 
-const CONSENT_INPUT_ID = "photo-consent";
+const INVALID_INVITATION_MESSAGE =
+  "Esta invitación no es válida o ya venció.";
 
-export default function ActivarCuentaPage() {
-  const { brand, child, consent, fields, header, submitLabel } = activationScreen;
+type InvitationPreview = {
+  email: string;
+  child_display_name: string;
+  classroom_name: string;
+  expires_at: string;
+};
+
+type ActivarCuentaPageProps = {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
+
+export default async function ActivarCuentaPage({
+  searchParams,
+}: ActivarCuentaPageProps) {
+  const params = await searchParams;
+  const rawCode = params.code;
+  const code = Array.isArray(rawCode) ? rawCode[0] : rawCode;
+  const normalizedCode = code?.replace(/\s+/g, "").toUpperCase() ?? "";
+
+  let preview: InvitationPreview | null = null;
+
+  if (normalizedCode) {
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
+    const { data } = await supabase.rpc("get_invitation_preview", {
+      p_code: normalizedCode,
+    });
+
+    preview = data?.[0] ?? null;
+  }
+
+  const { brand, child, fields, consent, header, submitLabel } =
+    activationScreen;
+  const hasPreview = preview !== null;
+
+  const formFields: AuthFieldData[] = fields.map((field) => {
+    if (field.name === "inviteCode") {
+      return {
+        ...field,
+        defaultValue: normalizedCode ? normalizedCode.split("").join(" ") : "",
+        readOnly: hasPreview,
+      };
+    }
+
+    if (field.name === "email") {
+      return {
+        ...field,
+        defaultValue: preview?.email ?? "",
+        readOnly: hasPreview,
+      };
+    }
+
+    return field;
+  });
+
+  const childInitial = preview
+    ? preview.child_display_name.trim().charAt(0).toUpperCase()
+    : "";
 
   return (
     <div className={PAGE_CLASSES}>
@@ -53,46 +100,27 @@ export default function ActivarCuentaPage() {
           <p className={SUBTITLE_CLASSES}>{header.body}</p>
         </header>
 
-        <section className={CHILD_CARD_CLASSES}>
-          <div aria-hidden="true" className={CHILD_AVATAR_CLASSES}>
-            {child.initial}
-          </div>
+        {preview ? (
+          <section className={CHILD_CARD_CLASSES}>
+            <div aria-hidden="true" className={CHILD_AVATAR_CLASSES}>
+              {childInitial}
+            </div>
 
-          <div className="flex flex-col">
-            <span className={CHILD_LABEL_CLASSES}>{child.invitationLabel}</span>
-            <span className={CHILD_NAME_CLASSES}>
-              {child.name} · {child.classroom}
-            </span>
-          </div>
-        </section>
-
-        <form className={FORM_CLASSES}>
-          {fields.map((field) => (
-            <AuthField field={field} key={field.id} />
-          ))}
-
-          <div className={CONSENT_BANNER_CLASSES}>
-            <label className={CONSENT_CONTROL_CLASSES} htmlFor={CONSENT_INPUT_ID}>
-              <input
-                className="peer absolute inset-0 h-full w-full cursor-pointer opacity-0"
-                defaultChecked
-                id={CONSENT_INPUT_ID}
-                name="photoConsent"
-                type="checkbox"
-              />
-              <span aria-hidden="true" className={CONSENT_BOX_CLASSES}>
-                <Icon name="check" size={16} />
+            <div className="flex flex-col">
+              <span className={CHILD_LABEL_CLASSES}>{child.invitationLabel}</span>
+              <span className={CHILD_NAME_CLASSES}>
+                {preview.child_display_name} · {preview.classroom_name}
               </span>
-              <span className={CONSENT_TEXT_CLASSES}>{consent.label}</span>
-            </label>
-          </div>
+            </div>
+          </section>
+        ) : null}
 
-          <div className="pt-2">
-            <button className={SUBMIT_CLASSES} type="button">
-              {submitLabel}
-            </button>
-          </div>
-        </form>
+        <ActivateAccountForm
+          consentLabel={consent.label}
+          fields={formFields}
+          notice={hasPreview ? undefined : INVALID_INVITATION_MESSAGE}
+          submitLabel={submitLabel}
+        />
       </main>
     </div>
   );

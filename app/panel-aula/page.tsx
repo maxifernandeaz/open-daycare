@@ -20,7 +20,11 @@ export const metadata: Metadata = {
 };
 
 export default async function PanelAulaPage() {
-  await requireStaff();
+  const profile = await requireStaff();
+  const canInvite =
+    profile.role === "admin" ||
+    profile.role === "director" ||
+    profile.role === "educator";
   const { students, protocols, totalChildren, error } =
     await getClassroomPanelData();
 
@@ -41,6 +45,7 @@ export default async function PanelAulaPage() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             <div className="lg:col-span-8 space-y-4">
               <StudentRoster
+                canInvite={canInvite}
                 error={error}
                 students={students}
                 totalChildren={totalChildren}
