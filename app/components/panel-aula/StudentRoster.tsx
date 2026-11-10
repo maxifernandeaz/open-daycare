@@ -24,12 +24,14 @@ type StudentRosterProps = {
   students: RosterStudent[];
   totalChildren: number;
   error: string | null;
+  canInvite: boolean;
 };
 
 export default function StudentRoster({
   students,
   totalChildren,
   error,
+  canInvite,
 }: StudentRosterProps) {
   const [query, setQuery] = useState("");
   const normalizedQuery = normalizeSearchText(query.trim());
@@ -89,7 +91,11 @@ export default function StudentRoster({
       {!error && visibleStudents.length > 0 ? (
         <div className={GRID_CLASSES}>
           {visibleStudents.map((student) => (
-            <StudentCard key={student.id} student={student} />
+            <StudentCard
+              canInvite={canInvite}
+              key={student.id}
+              student={student}
+            />
           ))}
         </div>
       ) : null}

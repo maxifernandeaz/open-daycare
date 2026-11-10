@@ -1,5 +1,6 @@
 import Icon from "@/app/components/Icons";
 import type { RosterStudent } from "@/app/panel-aula/queries";
+import InviteModal from "./InviteModal";
 import Tag from "./Tag";
 
 const CARD_CLASSES =
@@ -18,9 +19,10 @@ const INFO_VALUE_CLASSES = "text-on-surface font-medium truncate";
 
 type StudentCardProps = {
   student: RosterStudent;
+  canInvite: boolean;
 };
 
-export default function StudentCard({ student }: StudentCardProps) {
+export default function StudentCard({ student, canInvite }: StudentCardProps) {
   return (
     <article className={CARD_CLASSES}>
       <div className="flex items-start gap-3">
@@ -67,6 +69,10 @@ export default function StudentCard({ student }: StudentCardProps) {
           </div>
         </div>
       </div>
+
+      {canInvite ? (
+        <InviteModal childId={student.id} childName={student.name} />
+      ) : null}
     </article>
   );
 }
