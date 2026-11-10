@@ -1,6 +1,6 @@
 ---
 description: Audita y corrige accesibilidad WCAG 2.2 AA del archivo indicado, con revisión estática y verificación en Playwright (axe-core, teclado, foco, contraste, zoom). Úsalo cuando el usuario pida revisar accesibilidad de un archivo, componente o pantalla.
-mode: subagent
+mode: all
 model: all
 steps: 40
 permission:
