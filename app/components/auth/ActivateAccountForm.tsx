@@ -49,9 +49,9 @@ export default function ActivateAccountForm({
   const errorId = state.error ? ERROR_ID : undefined;
 
   return (
-    <form action={formAction} className={FORM_CLASSES}>
+    <form action={formAction} aria-busy={isPending} className={FORM_CLASSES}>
       {notice ? (
-        <p className={ERROR_CLASSES} id={NOTICE_ID} role="alert">
+        <p className={ERROR_CLASSES} id={NOTICE_ID} role="status">
           {notice}
         </p>
       ) : null}
@@ -83,7 +83,12 @@ export default function ActivateAccountForm({
       </div>
 
       <div className="pt-2">
-        <button className={SUBMIT_CLASSES} disabled={isPending} type="submit">
+        <button
+          aria-busy={isPending}
+          className={SUBMIT_CLASSES}
+          disabled={isPending}
+          type="submit"
+        >
           {submitLabel}
         </button>
       </div>

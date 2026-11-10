@@ -1,7 +1,7 @@
 ---
 description: Aplica las mejores prácticas de React 19 y Next.js App Router en los archivos indicados.
 mode: subagent
-model: google/gemini-2.5-pro
+model: all
 permission:
   edit: allow
   bash: allow

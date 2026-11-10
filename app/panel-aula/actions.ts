@@ -15,6 +15,10 @@ type TutorInvitation =
 const GENERIC_ERROR =
   "No se pudo crear la invitación. Intentá nuevamente en unos minutos.";
 const CHILD_FALLBACK_NAME = "tu hijo/a";
+const CHILD_MISSING_ERROR = "No se identificó al niño.";
+const EMAIL_REQUIRED_ERROR = "El email es obligatorio.";
+const EMAIL_INVALID_ERROR = "Email inválido.";
+const EMAIL_PATTERN = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
 export async function inviteFamily(
   childId: string,
@@ -24,11 +28,15 @@ export async function inviteFamily(
   const trimmedEmail = email.trim();
 
   if (!childId) {
-    return { success: false, error: "No se identificó al niño." };
+    return { success: false, error: CHILD_MISSING_ERROR };
   }
 
   if (!trimmedEmail) {
-    return { success: false, error: "El email es obligatorio." };
+    return { success: false, error: EMAIL_REQUIRED_ERROR };
+  }
+
+  if (!EMAIL_PATTERN.test(trimmedEmail)) {
+    return { success: false, error: EMAIL_INVALID_ERROR };
   }
 
   const cookieStore = await cookies();
@@ -40,12 +48,12 @@ export async function inviteFamily(
     .eq("id", childId)
     .maybeSingle();
 
-  const trimmedRelationship = relationship?.trim();
+  const trimmedRelationship = relationship?.trim() || undefined;
 
   const { data, error } = await supabase.rpc("create_tutor_invitation", {
     p_child_id: childId,
     p_email: trimmedEmail,
-    p_relationship: trimmedRelationship ? trimmedRelationship : undefined,
+    p_relationship: trimmedRelationship,
   });
 
   if (error) {

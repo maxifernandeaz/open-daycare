@@ -2,6 +2,8 @@ import { Resend } from "resend";
 
 const DEFAULT_FROM = "KiddiCare <onboarding@resend.dev>";
 const DEFAULT_SITE_URL = "http://localhost:3000";
+const MISSING_SITE_URL_ERROR =
+  "NEXT_PUBLIC_SITE_URL no está configurada en producción.";
 
 let resendClient: Resend | null = null;
 
@@ -19,6 +21,16 @@ function getResendClient(): Resend | null {
   resendClient ??= new Resend(apiKey);
 
   return resendClient;
+}
+
+function resolveSiteUrl(): string | null {
+  const configuredUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+
+  if (configuredUrl) {
+    return configuredUrl.replace(/\/+$/, "");
+  }
+
+  return process.env.NODE_ENV === "production" ? null : DEFAULT_SITE_URL;
 }
 
 function normalizeCode(code: string): string {
@@ -98,9 +110,12 @@ export async function sendInvitationEmail(
     };
   }
 
-  const siteUrl = (
-    process.env.NEXT_PUBLIC_SITE_URL ?? DEFAULT_SITE_URL
-  ).replace(/\/+$/, "");
+  const siteUrl = resolveSiteUrl();
+
+  if (!siteUrl) {
+    return { success: false, error: MISSING_SITE_URL_ERROR };
+  }
+
   const cleanCode = normalizeCode(code);
   const activationUrl = `${siteUrl}/activar-cuenta?code=${encodeURIComponent(cleanCode)}`;
 
