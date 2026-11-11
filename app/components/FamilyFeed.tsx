@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 
+import Link from "next/link";
 import Icon from "@/app/components/Icons";
 import Tag from "@/app/components/panel-aula/Tag";
 import type { Tone } from "@/data/mock-classroom";
@@ -22,6 +23,12 @@ const CARD_CLASSES =
 
 const META_CLASSES =
   "flex flex-wrap items-center gap-x-3 gap-y-1 font-body-sm text-body-sm text-on-surface-variant";
+
+const PAGINATION_CLASSES =
+  "flex flex-wrap items-center justify-between gap-2 pt-2 font-body-sm text-body-sm text-on-surface-variant";
+
+const PAGE_LINK_CLASSES =
+  "inline-flex min-h-11 items-center gap-1.5 px-4 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md text-label-md transition-colors active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary";
 
 const CATEGORY_TONES: Record<PostCategory, Tone> = {
   actividad: "primary",
@@ -166,6 +173,34 @@ export default function FamilyFeed({ data }: FamilyFeedProps) {
             />
           ))}
         </div>
+      ) : null}
+
+      {!data.error && (data.page > 1 || data.hasMore) ? (
+        <nav aria-label="Paginación de publicaciones" className={PAGINATION_CLASSES}>
+          {data.page > 1 ? (
+            <Link
+              className={PAGE_LINK_CLASSES}
+              href={`/?page=${data.page - 1}`}
+            >
+              <Icon name="chevron_left" size={18} />
+              <span>Anteriores</span>
+            </Link>
+          ) : (
+            <span />
+          )}
+
+          {data.hasMore ? (
+            <Link
+              className={PAGE_LINK_CLASSES}
+              href={`/?page=${data.page + 1}`}
+            >
+              <span>Ver más</span>
+              <Icon name="chevron_right" size={18} />
+            </Link>
+          ) : (
+            <span />
+          )}
+        </nav>
       ) : null}
     </section>
   );
