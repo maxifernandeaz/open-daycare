@@ -124,7 +124,9 @@ export default function DeletePostButton({
 
         <p className="font-body-md text-body-md text-on-surface-variant" id={descId}>
           Esta acción no se puede deshacer. Se eliminará la publicación{" "}
-          <strong className="font-semibold text-on-surface">"{postTitle}"</strong>{" "}
+          <strong className="font-semibold text-on-surface">
+            &quot;{postTitle}&quot;
+          </strong>{" "}
           junto con sus imágenes asociadas.
         </p>
 
