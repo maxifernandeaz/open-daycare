@@ -12,15 +12,21 @@ import Icon from "@/app/components/Icons";
 import {
   attachPostImages,
   createPost,
+  updatePost,
 } from "@/app/panel-aula/entradas/actions";
 import {
   POST_CATEGORY_VALUES,
   getCategoryLabel,
 } from "@/app/panel-aula/entradas/formatters";
-import type { PostFormOptions } from "@/app/panel-aula/entradas/queries";
+import type {
+  PostFormOptions,
+} from "@/app/panel-aula/entradas/queries";
 import ImageUploader, {
   type ImageUploaderHandle,
 } from "./ImageUploader";
+
+const MAX_POST_IMAGES = 4;
+const ALT_TEXT_MAX_LENGTH = 160;
 
 const FIELD_CLASSES =
   "w-full rounded-xl bg-surface-container-low px-4 py-3 font-body-md text-body-md text-on-surface placeholder:text-outline shadow-sm transition-colors focus:bg-surface-container-lowest focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-70";
@@ -47,11 +53,34 @@ const PRIMARY_BUTTON_CLASSES =
 const SECONDARY_BUTTON_CLASSES =
   "inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-surface-container px-4 py-2.5 font-label-md text-label-md text-on-surface transition-colors hover:bg-surface-container-high focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-70";
 
-type PostFormProps = {
-  options: PostFormOptions;
+export type ExistingImage = {
+  id: string;
+  path: string;
+  altText: string | null;
+  sortOrder: number;
+  url: string | null;
 };
 
-export default function PostForm({ options }: PostFormProps) {
+export type PostFormInitialData = {
+  postId: string;
+  title: string;
+  body: string;
+  category: string | null;
+  classroomId: string | null;
+  images: ExistingImage[];
+};
+
+type PostFormProps = {
+  options: PostFormOptions;
+  mode?: "create" | "edit";
+  initialData?: PostFormInitialData;
+};
+
+export default function PostForm({
+  options,
+  mode = "create",
+  initialData,
+}: PostFormProps) {
   const router = useRouter();
   const baseId = useId();
   const uploaderRef = useRef<ImageUploaderHandle>(null);
@@ -59,6 +88,13 @@ export default function PostForm({ options }: PostFormProps) {
   const [publishedPostId, setPublishedPostId] = useState<string | null>(null);
   const [warning, setWarning] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  const [keptImages, setKeptImages] = useState<ExistingImage[]>(
+    initialData?.images ?? [],
+  );
+  const [removedImageIds, setRemovedImageIds] = useState<string[]>([]);
+
+  const isEditing = mode === "edit";
 
   const titleId = `${baseId}-title`;
   const bodyId = `${baseId}-body`;
@@ -68,11 +104,28 @@ export default function PostForm({ options }: PostFormProps) {
   const warningId = `${baseId}-warning`;
 
   const hasNoClassrooms = !options.isManager && options.classrooms.length === 0;
-  const defaultClassroomId = options.isManager
-    ? ""
-    : (options.classrooms[0]?.id ?? "");
+  const defaultClassroomId = isEditing
+    ? (initialData?.classroomId ?? "")
+    : options.isManager
+      ? ""
+      : (options.classrooms[0]?.id ?? "");
   const isPublished = publishedPostId !== null;
   const isDisabled = isPending || isPublished;
+
+  const maxNewImages = MAX_POST_IMAGES - keptImages.length;
+
+  const handleRemoveExisting = (imageId: string) => {
+    setKeptImages((current) => current.filter((img) => img.id !== imageId));
+    setRemovedImageIds((current) => [...current, imageId]);
+  };
+
+  const handleExistingAltChange = (imageId: string, altText: string) => {
+    setKeptImages((current) =>
+      current.map((img) =>
+        img.id === imageId ? { ...img, altText } : img,
+      ),
+    );
+  };
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -90,49 +143,107 @@ export default function PostForm({ options }: PostFormProps) {
     setError(null);
     setWarning(null);
 
-    startTransition(async () => {
-      const result = await createPost({
-        title,
-        body,
-        category,
-        classroomId: classroomValue.length > 0 ? classroomValue : null,
-        imageTypes,
-      });
+    if (isEditing && initialData) {
+      startTransition(async () => {
+        const result = await updatePost({
+          postId: initialData.postId,
+          title,
+          body,
+          category,
+          classroomId: classroomValue.length > 0 ? classroomValue : null,
+          removedImageIds,
+          keptImages: keptImages.map((img) => ({
+            id: img.id,
+            altText: img.altText ?? "",
+          })),
+          newImageTypes: imageTypes,
+        });
 
-      if (!result.ok) {
-        setError(result.error);
-        return;
-      }
+        if (!result.ok) {
+          setError(result.error);
+          return;
+        }
 
-      let attachedCount = 0;
+        let attachedCount = 0;
 
-      if (uploader && result.uploadTargets.length > 0) {
-        const uploadResult = await uploader.uploadImages(result.uploadTargets);
+        if (uploader && result.uploadTargets.length > 0) {
+          const uploadResult = await uploader.uploadImages(
+            result.uploadTargets,
+          );
 
-        if (uploadResult.uploaded.length > 0) {
-          const attachResult = await attachPostImages({
-            postId: result.postId,
-            images: uploadResult.uploaded,
-          });
+          if (uploadResult.uploaded.length > 0) {
+            const attachResult = await attachPostImages({
+              postId: result.postId,
+              images: uploadResult.uploaded,
+            });
 
-          if (attachResult.ok) {
-            attachedCount = attachResult.attached;
+            if (attachResult.ok) {
+              attachedCount = attachResult.attached;
+            }
           }
         }
-      }
 
-      const missingCount = imageTypes.length - attachedCount;
+        const missingCount = imageTypes.length - attachedCount;
 
-      if (missingCount > 0 || result.warning) {
+        if (missingCount > 0 || result.warning) {
+          uploader?.clear();
+          setPublishedPostId(result.postId);
+          setWarning(
+            result.warning ?? getPartialFailureMessage(missingCount, true),
+          );
+          return;
+        }
+
         uploader?.clear();
-        setPublishedPostId(result.postId);
-        setWarning(getPartialFailureMessage(missingCount));
-        return;
-      }
+        router.push("/panel-aula/entradas");
+      });
+    } else {
+      startTransition(async () => {
+        const result = await createPost({
+          title,
+          body,
+          category,
+          classroomId: classroomValue.length > 0 ? classroomValue : null,
+          imageTypes,
+        });
 
-      uploader?.clear();
-      router.push("/panel-aula/entradas");
-    });
+        if (!result.ok) {
+          setError(result.error);
+          return;
+        }
+
+        let attachedCount = 0;
+
+        if (uploader && result.uploadTargets.length > 0) {
+          const uploadResult = await uploader.uploadImages(
+            result.uploadTargets,
+          );
+
+          if (uploadResult.uploaded.length > 0) {
+            const attachResult = await attachPostImages({
+              postId: result.postId,
+              images: uploadResult.uploaded,
+            });
+
+            if (attachResult.ok) {
+              attachedCount = attachResult.attached;
+            }
+          }
+        }
+
+        const missingCount = imageTypes.length - attachedCount;
+
+        if (missingCount > 0 || result.warning) {
+          uploader?.clear();
+          setPublishedPostId(result.postId);
+          setWarning(getPartialFailureMessage(missingCount, false));
+          return;
+        }
+
+        uploader?.clear();
+        router.push("/panel-aula/entradas");
+      });
+    }
   };
 
   if (options.error) {
@@ -179,13 +290,15 @@ export default function PostForm({ options }: PostFormProps) {
             <Icon className="shrink-0 text-tertiary" name="warning" size={20} />
             <span>{warning}</span>
           </p>
-          <a
-            className={LINK_BUTTON_CLASSES}
-            href={`/panel-aula/entradas/${publishedPostId}/editar`}
-          >
-            <Icon name="edit" size={18} />
-            <span>Ir a Editar</span>
-          </a>
+          {isEditing ? null : (
+            <a
+              className={LINK_BUTTON_CLASSES}
+              href={`/panel-aula/entradas/${publishedPostId}/editar`}
+            >
+              <Icon name="edit" size={18} />
+              <span>Ir a Editar</span>
+            </a>
+          )}
         </div>
       ) : null}
 
@@ -197,6 +310,7 @@ export default function PostForm({ options }: PostFormProps) {
           aria-describedby={error ? errorId : undefined}
           aria-required="true"
           className={FIELD_CLASSES}
+          defaultValue={initialData?.title ?? ""}
           disabled={isDisabled}
           id={titleId}
           maxLength={120}
@@ -215,6 +329,7 @@ export default function PostForm({ options }: PostFormProps) {
           aria-describedby={error ? errorId : undefined}
           aria-required="true"
           className={`${FIELD_CLASSES} min-h-40 resize-y`}
+          defaultValue={initialData?.body ?? ""}
           disabled={isDisabled}
           id={bodyId}
           maxLength={5000}
@@ -228,7 +343,21 @@ export default function PostForm({ options }: PostFormProps) {
         </p>
       </div>
 
-      <ImageUploader disabled={isDisabled} ref={uploaderRef} />
+      {isEditing && keptImages.length > 0 ? (
+        <ExistingImagesSection
+          baseId={baseId}
+          disabled={isDisabled}
+          images={keptImages}
+          onAltChange={handleExistingAltChange}
+          onRemove={handleRemoveExisting}
+        />
+      ) : null}
+
+      <ImageUploader
+        disabled={isDisabled}
+        maxImages={isEditing ? maxNewImages : MAX_POST_IMAGES}
+        ref={uploaderRef}
+      />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
@@ -262,7 +391,7 @@ export default function PostForm({ options }: PostFormProps) {
           </label>
           <select
             className={`${FIELD_CLASSES} cursor-pointer`}
-            defaultValue=""
+            defaultValue={initialData?.category ?? ""}
             disabled={isDisabled}
             id={categoryId}
             name="category"
@@ -286,18 +415,130 @@ export default function PostForm({ options }: PostFormProps) {
           disabled={isDisabled}
           type="submit"
         >
-          <Icon name="campaign" size={20} />
-          <span>{isPending ? "Publicando…" : "Publicar"}</span>
+          <Icon name={isEditing ? "save" : "campaign"} size={20} />
+          <span>
+            {isPending
+              ? isEditing
+                ? "Guardando…"
+                : "Publicando…"
+              : isEditing
+                ? "Guardar cambios"
+                : "Publicar"}
+          </span>
         </button>
       </div>
     </form>
   );
 }
 
-function getPartialFailureMessage(count: number): string {
+function getPartialFailureMessage(count: number, isEdit: boolean): string {
+  const verb = isEdit ? "actualizó" : "publicó";
+
   if (count === 1) {
-    return "La entrada se publicó, pero 1 imagen no se subió. Podés reintentarla desde Editar.";
+    return `La entrada se ${verb}, pero 1 imagen no se subió. Podés reintentarla desde Editar.`;
   }
 
-  return `La entrada se publicó, pero ${count} imágenes no se subieron. Podés reintentarlas desde Editar.`;
+  return `La entrada se ${verb}, pero ${count} imágenes no se subieron. Podés reintentarlas desde Editar.`;
+}
+
+/* eslint-disable @next/next/no-img-element */
+
+const REMOVE_EXISTING_BUTTON_CLASSES =
+  "inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg bg-surface-container-lowest px-3 py-2 font-label-sm text-label-sm text-on-surface transition-colors hover:bg-error-container hover:text-on-error-container focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary";
+
+const EXISTING_FIELD_CLASSES =
+  "w-full rounded-xl border border-outline bg-surface-container-lowest px-4 py-3 font-body-md text-body-md text-on-surface placeholder:text-outline shadow-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-70";
+
+const IMAGE_PLACEHOLDER_CLASSES =
+  "flex h-32 w-full items-center justify-center rounded-lg bg-surface-container text-on-surface-variant";
+
+type ExistingImagesSectionProps = {
+  baseId: string;
+  disabled: boolean;
+  images: ExistingImage[];
+  onAltChange: (imageId: string, altText: string) => void;
+  onRemove: (imageId: string) => void;
+};
+
+function ExistingImagesSection({
+  baseId,
+  disabled,
+  images,
+  onAltChange,
+  onRemove,
+}: ExistingImagesSectionProps) {
+  return (
+    <fieldset className="flex min-w-0 flex-col gap-3 border-0 p-0 m-0">
+      <legend className="font-label-md text-label-md text-on-surface mb-1.5">
+        Imágenes actuales
+      </legend>
+
+      <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        {images.map((image, index) => {
+          const altInputId = `${baseId}-existing-alt-${image.id}`;
+          const altHintId = `${baseId}-existing-alt-hint-${image.id}`;
+          const displayAlt =
+            image.altText?.trim() ||
+            `Imagen existente ${index + 1}`;
+
+          return (
+            <li
+              className="flex min-w-0 flex-col gap-2 rounded-xl bg-surface-container-low p-3"
+              key={image.id}
+            >
+              {image.url ? (
+                <img
+                  alt={displayAlt}
+                  className="h-32 w-full rounded-lg bg-surface-container object-cover"
+                  src={image.url}
+                />
+              ) : (
+                <div className={IMAGE_PLACEHOLDER_CLASSES}>
+                  <Icon name="broken_image" size={24} />
+                </div>
+              )}
+              <label
+                className="font-label-md text-label-md text-on-surface"
+                htmlFor={altInputId}
+              >
+                Descripción de la imagen {index + 1}{" "}
+                <span className="font-normal text-on-surface-variant">
+                  (opcional)
+                </span>
+              </label>
+              <input
+                aria-describedby={altHintId}
+                className={EXISTING_FIELD_CLASSES}
+                defaultValue={image.altText ?? ""}
+                disabled={disabled}
+                id={altInputId}
+                maxLength={ALT_TEXT_MAX_LENGTH}
+                onChange={(event) =>
+                  onAltChange(image.id, event.currentTarget.value)
+                }
+                placeholder="Ej. Niños jugando en el patio"
+                type="text"
+              />
+              <p
+                className="font-body-sm text-body-sm text-on-surface-variant"
+                id={altHintId}
+              >
+                Ayuda a las familias que usan lectores de pantalla.
+              </p>
+              <button
+                aria-label={`Quitar imagen existente ${index + 1}`}
+                className={`${REMOVE_EXISTING_BUTTON_CLASSES} self-start`}
+                disabled={disabled}
+                onClick={() => onRemove(image.id)}
+                type="button"
+              >
+                <Icon name="delete" size={18} />
+                <span>Quitar</span>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    </fieldset>
+  );
 }

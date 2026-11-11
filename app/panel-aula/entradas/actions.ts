@@ -35,6 +35,27 @@ export type CreatePostResult =
     }
   | { ok: false; error: string };
 
+export type UpdatePostInput = {
+  postId: string;
+  title: string;
+  body: string;
+  category: PostCategory | null;
+  classroomId: string | null;
+  removedImageIds: string[];
+  keptImages: Array<{ id: string; altText: string }>;
+  newImageTypes: PostImageMime[];
+};
+
+export type UpdatePostResult =
+  | {
+      ok: true;
+      postId: string;
+      uploadTargets: UploadTarget[];
+      warning?: string;
+      storageCleanupFailed?: boolean;
+    }
+  | { ok: false; error: string };
+
 export type AttachPostImagesInput = {
   postId: string;
   images: Array<{ path: string; altText: string }>;
@@ -76,6 +97,19 @@ const IMAGE_TYPE_INVALID_ERROR =
   "Formato de imagen no permitido. Usá JPG, PNG o WebP.";
 const IMAGE_SIGN_WARNING =
   "La entrada se publicó, pero no se pudieron preparar todas las imágenes. Podés agregar las que faltan desde Editar.";
+
+const UPDATE_ERROR =
+  "No se pudo actualizar la entrada. Intentá nuevamente en unos minutos.";
+const UPDATE_PERMISSION_ERROR =
+  "No tenés permiso para editar esta publicación.";
+const UPDATE_POST_MISSING_ERROR =
+  "La publicación no existe o no tenés acceso.";
+const UPDATE_IMAGE_OWNERSHIP_ERROR =
+  "Algunas imágenes no pertenecen a esta publicación.";
+const UPDATE_IMAGE_SIGN_WARNING =
+  "La entrada se actualizó, pero no se pudieron preparar todas las imágenes nuevas. Podés reintentarlas desde Editar.";
+const STORAGE_CLEANUP_WARNING =
+  "La entrada se actualizó, pero no se pudieron eliminar algunas imágenes del almacenamiento.";
 
 const ALT_TEXT_MAX_LENGTH = 160;
 const UUID_PATTERN =
@@ -170,6 +204,180 @@ export async function createPost(
     postId: created.id,
     uploadTargets: uploadTargets.targets,
     ...(uploadTargets.failed ? { warning: IMAGE_SIGN_WARNING } : {}),
+  };
+}
+
+export async function updatePost(
+  input: UpdatePostInput,
+): Promise<UpdatePostResult> {
+  const postId = typeof input.postId === "string" ? input.postId.trim() : "";
+
+  if (!UUID_PATTERN.test(postId)) {
+    return { ok: false, error: UPDATE_POST_MISSING_ERROR };
+  }
+
+  const title = input.title.trim();
+  const body = input.body.trim();
+  const classroomId = normalizeClassroomId(input.classroomId);
+
+  if (title.length === 0) {
+    return { ok: false, error: TITLE_REQUIRED_ERROR };
+  }
+
+  if (title.length > TITLE_MAX_LENGTH) {
+    return { ok: false, error: TITLE_TOO_LONG_ERROR };
+  }
+
+  if (body.length === 0) {
+    return { ok: false, error: BODY_REQUIRED_ERROR };
+  }
+
+  if (body.length > BODY_MAX_LENGTH) {
+    return { ok: false, error: BODY_TOO_LONG_ERROR };
+  }
+
+  if (!isPostCategory(input.category)) {
+    return { ok: false, error: CATEGORY_INVALID_ERROR };
+  }
+
+  const removedImageIds = sanitizeIdArray(input.removedImageIds);
+  const keptImages = sanitizeKeptImages(input.keptImages);
+  const newImageTypes = resolveImageTypes(input.newImageTypes);
+
+  if (!newImageTypes.ok) {
+    return { ok: false, error: newImageTypes.error };
+  }
+
+  const totalImages =
+    keptImages.length + newImageTypes.imageTypes.length;
+
+  if (totalImages > MAX_POST_IMAGES) {
+    return { ok: false, error: IMAGES_LIMIT_ERROR };
+  }
+
+  const profile = await getCurrentProfile();
+
+  if (!profile || profile.role === "tutor") {
+    return { ok: false, error: UPDATE_PERMISSION_ERROR };
+  }
+
+  const supabase = createClient(await cookies());
+  const editable = await resolveEditablePost(supabase, profile, postId);
+
+  if (!editable.ok) {
+    return { ok: false, error: editable.error };
+  }
+
+  const classroom = await resolveClassroomId(supabase, profile, classroomId);
+
+  if (!classroom.ok) {
+    return { ok: false, error: classroom.error };
+  }
+
+  // Verify that keptImages and removedImageIds all belong to this post
+  const { data: existingImages, error: existingError } = await supabase
+    .from("post_images")
+    .select("id, storage_path")
+    .eq("post_id", postId);
+
+  if (existingError || !existingImages) {
+    return { ok: false, error: UPDATE_ERROR };
+  }
+
+  const existingImageIds = new Set(existingImages.map((row) => row.id));
+  const existingPathsById = new Map(
+    existingImages.map((row) => [row.id, row.storage_path]),
+  );
+
+  for (const kept of keptImages) {
+    if (!existingImageIds.has(kept.id)) {
+      return { ok: false, error: UPDATE_IMAGE_OWNERSHIP_ERROR };
+    }
+  }
+
+  for (const removedId of removedImageIds) {
+    if (!existingImageIds.has(removedId)) {
+      return { ok: false, error: UPDATE_IMAGE_OWNERSHIP_ERROR };
+    }
+  }
+
+  // Update the post itself
+  const { error: updateError } = await supabase
+    .from("posts")
+    .update({
+      title,
+      body,
+      category: input.category,
+      classroom_id: classroom.classroomId,
+    })
+    .eq("id", postId);
+
+  if (updateError) {
+    return { ok: false, error: UPDATE_ERROR };
+  }
+
+  // Update alt_text of kept images
+  for (const kept of keptImages) {
+    const altText =
+      typeof kept.altText === "string" ? kept.altText.trim() : "";
+
+    await supabase
+      .from("post_images")
+      .update({ alt_text: altText.length > 0 ? altText : null })
+      .eq("id", kept.id)
+      .eq("post_id", postId);
+  }
+
+  // Remove images: try storage cleanup first, then delete row
+  let storageCleanupFailed = false;
+
+  for (const removedId of removedImageIds) {
+    const storagePath = existingPathsById.get(removedId);
+
+    if (storagePath) {
+      const { error: removeError } = await supabase.storage
+        .from(POST_IMAGES_BUCKET)
+        .remove([storagePath]);
+
+      if (removeError) {
+        storageCleanupFailed = true;
+      }
+    }
+
+    await supabase
+      .from("post_images")
+      .delete()
+      .eq("id", removedId)
+      .eq("post_id", postId);
+  }
+
+  // Generate signed upload URLs for new images
+  const uploadTargets = await createUploadTargets(
+    supabase,
+    postId,
+    newImageTypes.imageTypes,
+  );
+
+  revalidatePath("/");
+  revalidatePath("/panel-aula/entradas");
+  revalidatePath(`/panel-aula/entradas/${postId}/editar`);
+
+  const warnings: string[] = [];
+
+  if (storageCleanupFailed) {
+    warnings.push(STORAGE_CLEANUP_WARNING);
+  }
+
+  if (uploadTargets.failed) {
+    warnings.push(UPDATE_IMAGE_SIGN_WARNING);
+  }
+
+  return {
+    ok: true,
+    postId,
+    uploadTargets: uploadTargets.targets,
+    ...(warnings.length > 0 ? { warning: warnings.join(" ") } : {}),
+    ...(storageCleanupFailed ? { storageCleanupFailed: true } : {}),
   };
 }
 
@@ -479,6 +687,43 @@ function normalizeClassroomId(value: string | null): string | null {
   const trimmed = value.trim();
 
   return trimmed.length > 0 ? trimmed : null;
+}
+
+function sanitizeIdArray(value: unknown): string[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  const ids: string[] = [];
+
+  for (const item of value) {
+    if (typeof item === "string" && UUID_PATTERN.test(item)) {
+      ids.push(item);
+    }
+  }
+
+  return ids;
+}
+
+function sanitizeKeptImages(
+  value: unknown,
+): Array<{ id: string; altText: string }> {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  const images: Array<{ id: string; altText: string }> = [];
+
+  for (const item of value) {
+    const id = typeof item?.id === "string" ? item.id : "";
+    const altText = typeof item?.altText === "string" ? item.altText : "";
+
+    if (UUID_PATTERN.test(id)) {
+      images.push({ id, altText });
+    }
+  }
+
+  return images;
 }
 
 function isPostImageMime(value: unknown): value is PostImageMime {

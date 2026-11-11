@@ -5,12 +5,14 @@ import { notFound } from "next/navigation";
 import Icon from "@/app/components/Icons";
 import AppHeader from "@/app/components/panel-aula/AppHeader";
 import AppSidebar from "@/app/components/panel-aula/AppSidebar";
+import PostForm from "@/app/components/panel-aula/posts/PostForm";
+import type { PostFormInitialData } from "@/app/components/panel-aula/posts/PostForm";
 import {
   MAIN_TOP_CLASS,
   SIDEBAR_OFFSET_CLASS,
 } from "@/app/components/panel-aula/shell";
 import { requireStaff } from "@/utils/auth";
-import { getPostForEdit } from "../../queries";
+import { getPostForEdit, getPostFormOptions } from "../../queries";
 
 export const metadata: Metadata = {
   title: "KiddiCare · Editar Publicación",
@@ -47,10 +49,13 @@ function PageShell({ children }: PageShellProps) {
 export default async function EditarEntradaPage({
   params,
 }: EditarEntradaPageProps) {
-  await requireStaff();
+  const profile = await requireStaff();
 
   const { id } = await params;
-  const { post, error } = await getPostForEdit(id);
+  const [{ post, imageUrls, error }, options] = await Promise.all([
+    getPostForEdit(id),
+    getPostFormOptions(profile),
+  ]);
 
   if (error) {
     return (
@@ -65,6 +70,21 @@ export default async function EditarEntradaPage({
   if (!post || !post.canEdit) {
     notFound();
   }
+
+  const initialData: PostFormInitialData = {
+    postId: post.id,
+    title: post.title,
+    body: post.body,
+    category: post.category,
+    classroomId: post.classroomId,
+    images: post.images.map((image) => ({
+      id: image.id,
+      path: image.path,
+      altText: image.altText,
+      sortOrder: image.sortOrder,
+      url: imageUrls[image.path] ?? null,
+    })),
+  };
 
   return (
     <PageShell>
@@ -84,9 +104,7 @@ export default async function EditarEntradaPage({
         </p>
       </header>
 
-      <section className="rounded-xl bg-surface-container-lowest p-6 shadow-sm font-body-sm text-body-sm text-on-surface-variant">
-        El formulario de edición se habilita en un paso posterior de la implementación.
-      </section>
+      <PostForm initialData={initialData} mode="edit" options={options} />
     </PageShell>
   );
 }
