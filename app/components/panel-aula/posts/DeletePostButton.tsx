@@ -5,7 +5,7 @@ import Icon from "@/app/components/Icons";
 import { deletePost } from "@/app/panel-aula/entradas/actions";
 
 const TRIGGER_BUTTON_CLASSES =
-  "inline-flex min-h-11 items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-surface-container-low hover:bg-error-container text-on-surface hover:text-on-error-container font-label-md text-label-md transition-colors active:scale-95 disabled:cursor-not-allowed disabled:opacity-70";
+  "inline-flex min-h-11 items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-surface-container-low hover:bg-error-container text-on-surface hover:text-on-error-container font-label-md text-label-md transition-colors active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-70";
 
 const CANCEL_BUTTON_CLASSES =
   "inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-surface-container px-4 py-2.5 font-label-md text-label-md text-on-surface transition-colors hover:bg-surface-container-high focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-70";
@@ -117,12 +117,18 @@ export default function DeletePostButton({
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-error-container text-on-error-container">
             <Icon name="delete" size={20} />
           </div>
-          <h2 className="font-title-md text-title-md text-on-surface" id={titleId}>
+          <h2
+            className="font-title-md text-title-md text-on-surface break-words"
+            id={titleId}
+          >
             ¿Eliminar publicación?
           </h2>
         </div>
 
-        <p className="font-body-md text-body-md text-on-surface-variant" id={descId}>
+        <p
+          className="font-body-md text-body-md text-on-surface-variant break-words"
+          id={descId}
+        >
           Esta acción no se puede deshacer. Se eliminará la publicación{" "}
           <strong className="font-semibold text-on-surface">
             &quot;{postTitle}&quot;
@@ -151,7 +157,9 @@ export default function DeletePostButton({
             onClick={handleConfirm}
             type="button"
           >
-            {isPending ? "Eliminando…" : "Sí, eliminar"}
+            <span aria-live="polite">
+              {isPending ? "Eliminando…" : "Sí, eliminar"}
+            </span>
           </button>
         </div>
       </dialog>

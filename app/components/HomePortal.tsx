@@ -53,7 +53,7 @@ export default function HomePortal({ feed }: HomePortalProps) {
           <ChildSummary child={child} onNotify={notify} onOpenAuth={openAuthModal} />
           <MetricCards metrics={metrics} />
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            <div className="lg:col-span-8 flex flex-col gap-6">
+            <div className="lg:col-span-8 min-w-0 flex flex-col gap-6">
               {feed}
               <TimelineSection
                 events={timeline}

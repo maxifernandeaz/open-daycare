@@ -30,7 +30,7 @@ const MAX_POST_IMAGES = 4;
 const ALT_TEXT_MAX_LENGTH = 160;
 
 const FIELD_CLASSES =
-  "w-full rounded-xl bg-surface-container-low px-4 py-3 font-body-md text-body-md text-on-surface placeholder:text-outline shadow-sm transition-colors focus:bg-surface-container-lowest focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-70";
+  "w-full rounded-xl border border-outline bg-surface-container-low px-4 py-3 font-body-md text-body-md text-on-surface placeholder:text-outline shadow-sm transition-colors focus:bg-surface-container-lowest focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-70";
 
 const LABEL_CLASSES = "font-label-md text-label-md text-on-surface";
 
@@ -428,7 +428,7 @@ export default function PostForm({
           type="submit"
         >
           <Icon name={isEditing ? "save" : "campaign"} size={20} />
-          <span>
+          <span aria-live="polite">
             {isPending
               ? isEditing
                 ? "Guardando…"

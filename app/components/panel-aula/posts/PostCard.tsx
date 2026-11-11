@@ -23,7 +23,7 @@ const META_CLASSES =
   "flex flex-wrap items-center gap-x-3 gap-y-1 font-body-sm text-body-sm text-on-surface-variant";
 
 const ACTION_CLASSES =
-  "inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md text-label-md transition-colors active:scale-95";
+  "inline-flex min-h-11 items-center gap-1.5 px-3 py-2 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md text-label-md transition-colors active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary";
 
 const CATEGORY_TONES: Record<PostCategory, Tone> = {
   actividad: "primary",

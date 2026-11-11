@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 };
 
 const NEW_POST_CLASSES =
-  "inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-on-primary font-label-lg text-label-lg shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200";
+  "inline-flex min-h-11 items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-on-primary font-label-lg text-label-lg shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary";
 
 type EntradasPageProps = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;

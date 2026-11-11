@@ -16,10 +16,10 @@ import {
 } from "@/app/panel-aula/entradas/formatters";
 
 const SECTION_CLASSES =
-  "bg-surface-container-lowest rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col gap-6";
+  "min-w-0 bg-surface-container-lowest rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col gap-6";
 
 const CARD_CLASSES =
-  "rounded-2xl bg-surface-container-low p-4 sm:p-5 flex flex-col gap-4";
+  "min-w-0 rounded-2xl bg-surface-container-low p-4 sm:p-5 flex flex-col gap-4";
 
 const META_CLASSES =
   "flex flex-wrap items-center gap-x-3 gap-y-1 font-body-sm text-body-sm text-on-surface-variant";

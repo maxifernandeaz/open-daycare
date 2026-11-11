@@ -90,7 +90,7 @@ export default async function EditarEntradaPage({
     <PageShell>
       <header className="flex flex-col gap-1.5">
         <Link
-          className="inline-flex items-center gap-1 font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors self-start"
+          className="inline-flex min-h-11 items-center gap-1 font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors self-start focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded-lg"
           href="/panel-aula/entradas"
         >
           <Icon name="chevron_left" size={16} />
