@@ -65,6 +65,14 @@ export type AttachPostImagesResult =
   | { ok: true; attached: number; failed: number }
   | { ok: false; error: string };
 
+export type DeletePostResult =
+  | { ok: true; storageCleanupFailed: boolean }
+  | { ok: false; error: string };
+
+export type PhotoConsentCountResult =
+  | { ok: true; count: number }
+  | { ok: false; error: string };
+
 const TITLE_MAX_LENGTH = 120;
 const BODY_MAX_LENGTH = 5000;
 const MAX_POST_IMAGES = 4;
@@ -110,6 +118,16 @@ const UPDATE_IMAGE_SIGN_WARNING =
   "La entrada se actualizó, pero no se pudieron preparar todas las imágenes nuevas. Podés reintentarlas desde Editar.";
 const STORAGE_CLEANUP_WARNING =
   "La entrada se actualizó, pero no se pudieron eliminar algunas imágenes del almacenamiento.";
+
+const DELETE_ERROR =
+  "No se pudo borrar la entrada. Intentá nuevamente en unos minutos.";
+const DELETE_PERMISSION_ERROR =
+  "No tenés permiso para borrar esta publicación.";
+const DELETE_POST_MISSING_ERROR =
+  "La publicación no existe o no tenés acceso.";
+
+const CONSENT_COUNT_ERROR =
+  "No se pudo verificar el consentimiento de imágenes.";
 
 const ALT_TEXT_MAX_LENGTH = 160;
 const UUID_PATTERN =
@@ -518,6 +536,95 @@ export async function attachPostImages(
   revalidatePath("/panel-aula/entradas");
 
   return { ok: true, attached, failed };
+}
+
+export async function deletePost(postIdInput: string): Promise<DeletePostResult> {
+  const postId = typeof postIdInput === "string" ? postIdInput.trim() : "";
+
+  if (!UUID_PATTERN.test(postId)) {
+    return { ok: false, error: DELETE_POST_MISSING_ERROR };
+  }
+
+  const profile = await getCurrentProfile();
+
+  if (!profile || profile.role === "tutor") {
+    return { ok: false, error: DELETE_PERMISSION_ERROR };
+  }
+
+  const supabase = createClient(await cookies());
+  const editable = await resolveEditablePost(supabase, profile, postId);
+
+  if (!editable.ok) {
+    return { ok: false, error: editable.error };
+  }
+
+  // Get image storage paths for cleanup
+  const { data: postImages, error: imagesError } = await supabase
+    .from("post_images")
+    .select("storage_path")
+    .eq("post_id", postId);
+
+  if (imagesError) {
+    return { ok: false, error: DELETE_ERROR };
+  }
+
+  let storageCleanupFailed = false;
+  const paths = (postImages ?? [])
+    .map((img) => img.storage_path)
+    .filter((path) => typeof path === "string" && path.length > 0);
+
+  if (paths.length > 0) {
+    const { error: removeError } = await supabase.storage
+      .from(POST_IMAGES_BUCKET)
+      .remove(paths);
+
+    if (removeError) {
+      storageCleanupFailed = true;
+    }
+  }
+
+  // Delete the post row (foreign key cascading or RLS will handle post_images or we delete post directly)
+  const { error: deleteError } = await supabase
+    .from("posts")
+    .delete()
+    .eq("id", postId);
+
+  if (deleteError) {
+    return { ok: false, error: DELETE_ERROR };
+  }
+
+  revalidatePath("/");
+  revalidatePath("/panel-aula/entradas");
+
+  return { ok: true, storageCleanupFailed };
+}
+
+export async function getPhotoConsentCount(
+  classroomIdInput: string | null,
+): Promise<PhotoConsentCountResult> {
+  const classroomId = normalizeClassroomId(classroomIdInput);
+
+  if (classroomId !== null && !UUID_PATTERN.test(classroomId)) {
+    return { ok: false, error: CONSENT_COUNT_ERROR };
+  }
+
+  const profile = await getCurrentProfile();
+
+  if (!profile || profile.role === "tutor") {
+    return { ok: false, error: CONSENT_COUNT_ERROR };
+  }
+
+  const supabase = createClient(await cookies());
+  const { data, error } = await supabase.rpc(
+    "count_children_without_photo_consent",
+    classroomId === null ? {} : { p_classroom_id: classroomId },
+  );
+
+  if (error || typeof data !== "number") {
+    return { ok: false, error: CONSENT_COUNT_ERROR };
+  }
+
+  return { ok: true, count: data };
 }
 
 type ImageTypesResolution =

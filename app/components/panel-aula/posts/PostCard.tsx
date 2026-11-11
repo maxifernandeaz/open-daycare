@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Icon from "@/app/components/Icons";
 import Tag from "@/app/components/panel-aula/Tag";
+import DeletePostButton from "./DeletePostButton";
 import type { Tone } from "@/data/mock-classroom";
 import type {
   PostCategory,
@@ -76,13 +77,16 @@ export default function PostCard({ post, imageUrls }: PostCardProps) {
         </div>
 
         {post.canEdit ? (
-          <Link
-            className={`${ACTION_CLASSES} self-start shrink-0`}
-            href={`/panel-aula/entradas/${post.id}/editar`}
-          >
-            <Icon name="edit" size={18} />
-            <span>Editar</span>
-          </Link>
+          <div className="flex items-center gap-2 self-start shrink-0">
+            <Link
+              className={ACTION_CLASSES}
+              href={`/panel-aula/entradas/${post.id}/editar`}
+            >
+              <Icon name="edit" size={18} />
+              <span>Editar</span>
+            </Link>
+            <DeletePostButton postId={post.id} postTitle={post.title} />
+          </div>
         ) : null}
       </div>
 

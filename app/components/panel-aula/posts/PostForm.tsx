@@ -24,6 +24,7 @@ import type {
 import ImageUploader, {
   type ImageUploaderHandle,
 } from "./ImageUploader";
+import ConsentNotice from "./ConsentNotice";
 
 const MAX_POST_IMAGES = 4;
 const ALT_TEXT_MAX_LENGTH = 160;
@@ -109,6 +110,8 @@ export default function PostForm({
     : options.isManager
       ? ""
       : (options.classrooms[0]?.id ?? "");
+  const [selectedClassroomId, setSelectedClassroomId] =
+    useState(defaultClassroomId);
   const isPublished = publishedPostId !== null;
   const isDisabled = isPending || isPublished;
 
@@ -366,10 +369,13 @@ export default function PostForm({
           </label>
           <select
             className={`${FIELD_CLASSES} cursor-pointer`}
-            defaultValue={defaultClassroomId}
             disabled={isDisabled}
             id={classroomId}
             name="classroom_id"
+            onChange={(event) =>
+              setSelectedClassroomId(event.currentTarget.value)
+            }
+            value={selectedClassroomId}
           >
             {options.isManager ? (
               <option value="">Todas las aulas</option>
@@ -405,6 +411,12 @@ export default function PostForm({
           </select>
         </div>
       </div>
+
+      <ConsentNotice
+        classroomId={
+          selectedClassroomId.length > 0 ? selectedClassroomId : null
+        }
+      />
 
       <div className="flex flex-wrap items-center justify-end gap-3">
         <a className={SECONDARY_BUTTON_CLASSES} href="/panel-aula/entradas">
