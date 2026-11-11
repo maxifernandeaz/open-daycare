@@ -18,7 +18,7 @@ import type {
 } from "@/app/panel-aula/entradas/actions";
 import { createClient } from "@/utils/supabase/client";
 
-const MAX_IMAGES = 4;
+const DEFAULT_MAX_IMAGES = 4;
 const MAX_FILE_BYTES = 5 * 1024 * 1024;
 const ALT_TEXT_MAX_LENGTH = 160;
 const POST_IMAGES_BUCKET = "post-images";
@@ -29,12 +29,11 @@ const ALLOWED_MIME_TYPES = [
 ] as const satisfies readonly PostImageMime[];
 const ACCEPTED_FILE_TYPES = ALLOWED_MIME_TYPES.join(",");
 
-const IMAGES_LIMIT_ERROR = "Podés adjuntar hasta 4 imágenes.";
 const FILE_TYPE_ERROR = "Solo se permiten imágenes JPG, PNG o WebP.";
 const FILE_SIZE_ERROR = "Cada imagen debe pesar 5 MB o menos.";
 
 const FIELD_CLASSES =
-  "w-full rounded-xl bg-surface-container-low px-4 py-3 font-body-md text-body-md text-on-surface placeholder:text-outline shadow-sm transition-colors focus:bg-surface-container-lowest focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-70";
+  "w-full rounded-xl border border-outline bg-surface-container-lowest px-4 py-3 font-body-md text-body-md text-on-surface placeholder:text-outline shadow-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-70";
 
 const LABEL_CLASSES = "font-label-md text-label-md text-on-surface";
 
@@ -76,11 +75,13 @@ type DraftImage = {
 type ImageUploaderProps = {
   ref?: Ref<ImageUploaderHandle>;
   disabled?: boolean;
+  maxImages?: number;
 };
 
 export default function ImageUploader({
   ref,
   disabled = false,
+  maxImages = DEFAULT_MAX_IMAGES,
 }: ImageUploaderProps) {
   const baseId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -93,7 +94,7 @@ export default function ImageUploader({
   const errorId = `${baseId}-error`;
 
   const isDisabled = disabled || isUploading;
-  const canAddMore = images.length < MAX_IMAGES;
+  const canAddMore = images.length < maxImages;
 
   useEffect(() => {
     imagesRef.current = images;
@@ -124,8 +125,8 @@ export default function ImageUploader({
     let nextError: string | null = null;
 
     for (const file of files) {
-      if (images.length + selected.length >= MAX_IMAGES) {
-        nextError = IMAGES_LIMIT_ERROR;
+      if (images.length + selected.length >= maxImages) {
+        nextError = getImagesLimitError(maxImages);
         break;
       }
 
@@ -249,7 +250,7 @@ export default function ImageUploader({
       </legend>
 
       <p className={HINT_CLASSES} id={hintId}>
-        Hasta 4 imágenes JPG, PNG o WebP de 5 MB como máximo.
+        Hasta {maxImages} imágenes JPG, PNG o WebP de 5 MB como máximo.
       </p>
 
       {error ? (
@@ -282,7 +283,7 @@ export default function ImageUploader({
           <span>Añadir imágenes</span>
         </button>
         <span className={HINT_CLASSES} aria-live="polite">
-          {images.length} de {MAX_IMAGES}
+          {images.length} de {maxImages}
         </span>
         {isUploading ? (
           <span className={HINT_CLASSES} aria-live="polite">
@@ -348,6 +349,10 @@ export default function ImageUploader({
       ) : null}
     </fieldset>
   );
+}
+
+function getImagesLimitError(maxImages: number): string {
+  return `Podés adjuntar hasta ${maxImages} imágenes.`;
 }
 
 function isAllowedMime(value: string): value is PostImageMime {
