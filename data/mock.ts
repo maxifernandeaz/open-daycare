@@ -4,12 +4,6 @@ const childPhoto =
 const childFallbackPhoto =
   "https://images.unsplash.com/photo-1596870230751-ebdfce98ec42?auto=format&fit=crop&w=400&q=80";
 
-const highlightImage =
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuCKf3j2e92Gk-k4gP4f2o8_wA6W6-P7M3UuL3e5g6gq9a_n1M8Q-W_F2A=s1200";
-
-const highlightFallbackImage =
-  "https://images.unsplash.com/photo-1587654780291-39c9404d746b?auto=format&fit=crop&w=1200&q=80";
-
 const authorizedPeople: AuthorizedPerson[] = [
   {
     id: "p1",
@@ -180,17 +174,6 @@ export const dailyHome = {
       meta: [],
     },
   ] satisfies TimelineEvent[],
-  highlight: {
-    author: { name: "Elena Morales", role: "Tutora Titular" },
-    timeTitle: "Hoy a las 11:15h · Taller Sensorial de Otoño",
-    image: highlightImage,
-    fallbackImage: highlightFallbackImage,
-    placeLabel: "Espacio Montessori · Bloques de textura y madera",
-    description:
-      "«Hoy Mateo ha disfrutado muchísimo encajando las piezas de madera y compartiendo los cubos blanditos con Martina. Ha mostrado muchísima curiosidad con los contrastes de colores y no paraba de reír cuando se caía la torrecita. ¡Está dando pasos agigantados en su motricidad fina!»",
-    likesLabel: "12 familias y profes",
-    albumActionLabel: "Añadir a mi álbum",
-  } satisfies TeacherPost,
 };
 
 export const homeConfig = {
@@ -251,17 +234,6 @@ export type TimelineEvent = {
   icon: string;
   iconTone: string;
   meta: { label: string; tone?: string }[];
-};
-
-export type TeacherPost = {
-  author: { name: string; role: string };
-  timeTitle: string;
-  image: string;
-  fallbackImage: string;
-  placeLabel: string;
-  description: string;
-  likesLabel: string;
-  albumActionLabel: string;
 };
 
 export type AuthorizedPerson = {

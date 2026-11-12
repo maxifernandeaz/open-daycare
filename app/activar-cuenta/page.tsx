@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import ActivateAccountForm from "@/app/components/auth/ActivateAccountForm";
 import BrandLockup from "@/app/components/auth/BrandLockup";
 import { activationScreen, type AuthFieldData } from "@/data/mock-auth";
+import type { Database } from "@/types/database";
 import { createClient } from "@/utils/supabase/server";
 
 export const metadata: Metadata = {
@@ -31,36 +32,47 @@ const CHILD_NAME_CLASSES = "font-headline-sm text-headline-sm text-on-surface";
 const INVALID_INVITATION_MESSAGE =
   "Esta invitación no es válida o ya venció.";
 
-type InvitationPreview = {
-  email: string;
-  child_display_name: string;
-  classroom_name: string;
-  expires_at: string;
-};
+type InvitationPreview =
+  Database["public"]["Functions"]["get_invitation_preview"]["Returns"][number];
 
 type ActivarCuentaPageProps = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
+function firstParam(value: string | string[] | undefined): string | undefined {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+function normalizeCode(value: string | undefined): string {
+  return value?.replace(/\s+/g, "").toUpperCase() ?? "";
+}
+
+async function getInvitationPreview(
+  code: string,
+): Promise<InvitationPreview | null> {
+  if (!code) {
+    return null;
+  }
+
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+  const { data, error } = await supabase.rpc("get_invitation_preview", {
+    p_code: code,
+  });
+
+  if (error) {
+    return null;
+  }
+
+  return data?.[0] ?? null;
+}
+
 export default async function ActivarCuentaPage({
   searchParams,
 }: ActivarCuentaPageProps) {
   const params = await searchParams;
-  const rawCode = params.code;
-  const code = Array.isArray(rawCode) ? rawCode[0] : rawCode;
-  const normalizedCode = code?.replace(/\s+/g, "").toUpperCase() ?? "";
-
-  let preview: InvitationPreview | null = null;
-
-  if (normalizedCode) {
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
-    const { data } = await supabase.rpc("get_invitation_preview", {
-      p_code: normalizedCode,
-    });
-
-    preview = data?.[0] ?? null;
-  }
+  const normalizedCode = normalizeCode(firstParam(params.code));
+  const preview = await getInvitationPreview(normalizedCode);
 
   const { brand, child, fields, consent, header, submitLabel } =
     activationScreen;

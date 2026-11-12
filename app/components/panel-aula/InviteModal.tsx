@@ -56,11 +56,15 @@ const SUCCESS_CLASSES =
 const CODE_CLASSES =
   "mt-1 block font-label-lg text-label-lg font-bold tracking-[0.25em] text-on-primary-fixed";
 
+const UNEXPECTED_ERROR =
+  "No pudimos enviar la invitación. Revisá tu conexión e intentá nuevamente.";
+
 export default function InviteModal({ childId, childName }: InviteModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const emailInputRef = useRef<HTMLInputElement>(null);
   const lastSubmission = useRef<Submission | null>(null);
+  const inFlight = useRef(false);
   const baseId = useId();
 
   const [state, setState] = useState<ModalState>({ status: "idle" });
@@ -94,37 +98,53 @@ export default function InviteModal({ childId, childName }: InviteModalProps) {
   };
 
   const sendInvitation = async ({ email, relationship }: Submission) => {
+    if (inFlight.current) {
+      return;
+    }
+
+    inFlight.current = true;
     lastSubmission.current = { email, relationship };
     setState({ status: "loading" });
 
-    const result = await inviteFamily(
-      childId,
-      email,
-      relationship ? relationship : undefined,
-    );
+    try {
+      const result = await inviteFamily(
+        childId,
+        email,
+        relationship ? relationship : undefined,
+      );
 
-    if (!result.success) {
+      if (!result.success) {
+        setState({
+          status: "error",
+          message: result.error,
+          canResend: false,
+          code: null,
+        });
+        return;
+      }
+
+      if (!result.emailSent) {
+        setState({
+          status: "error",
+          message:
+            "La invitación quedó creada, pero no pudimos enviar el correo. Podés reenviarlo ahora.",
+          canResend: true,
+          code: result.code,
+        });
+        return;
+      }
+
+      setState({ status: "success", email, code: result.code });
+    } catch {
       setState({
         status: "error",
-        message: result.error,
+        message: UNEXPECTED_ERROR,
         canResend: false,
         code: null,
       });
-      return;
+    } finally {
+      inFlight.current = false;
     }
-
-    if (!result.emailSent) {
-      setState({
-        status: "error",
-        message:
-          "La invitación quedó creada, pero no pudimos enviar el correo. Podés reenviarlo ahora.",
-        canResend: true,
-        code: result.code,
-      });
-      return;
-    }
-
-    setState({ status: "success", email, code: result.code });
   };
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -233,7 +253,11 @@ export default function InviteModal({ childId, childName }: InviteModalProps) {
               </button>
             </div>
           ) : (
-            <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+            <form
+              aria-busy={isLoading}
+              className="flex flex-col gap-4"
+              onSubmit={handleSubmit}
+            >
               <div className="flex flex-col gap-1.5">
                 <label className={LABEL_CLASSES} htmlFor={emailId}>
                   Email de la familia

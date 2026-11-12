@@ -55,6 +55,12 @@ type StaffProfileRow = {
 };
 
 const LOAD_ERROR = "No se pudieron cargar los niños.";
+const UNASSIGNED_CLASSROOM_LABEL = "Sin aula";
+const PROTOCOL_ID_PREFIX = "protocol-";
+const URGENT_ALERT_TAG = "Alerta médica";
+const URGENT_ALERT_DESCRIPTION = "Aviso médico urgente activado.";
+const ALLERGIES_DESCRIPTION_PREFIX = "Alergias registradas";
+const LABEL_SEPARATOR = " · ";
 
 const EMPTY_PANEL_DATA: ClassroomPanelData = {
   students: [],
@@ -138,14 +144,22 @@ export async function getClassroomPanelData(): Promise<ClassroomPanelData> {
     allergiesByChildId.set(childAllergy.child_id, entries);
   }
 
+  const getChildHealth = (childId: string) => {
+    const allergyEntries = allergiesByChildId.get(childId) ?? [];
+
+    return {
+      allergyEntries,
+      allergyLabels: getAllergyLabels(allergyEntries),
+      urgent: healthByChildId.get(childId)?.urgent_medical_flag ?? false,
+    };
+  };
+
   const students: RosterStudent[] = childrenResult.data.map((child) => {
     const classroom = classroomsById.get(child.classroom_id);
     const educator = child.primary_educator_id
       ? profilesById.get(child.primary_educator_id)
       : undefined;
-    const allergyEntries = allergiesByChildId.get(child.id) ?? [];
-    const allergyLabels = getAllergyLabels(allergyEntries);
-    const urgent = healthByChildId.get(child.id)?.urgent_medical_flag ?? false;
+    const { allergyLabels, urgent } = getChildHealth(child.id);
 
     return {
       id: child.id,
@@ -153,7 +167,7 @@ export async function getClassroomPanelData(): Promise<ClassroomPanelData> {
       nickname: child.nickname,
       initials: getInitials(child.full_name),
       ageLabel: getAgeLabel(child.birth_date),
-      classroomName: classroom?.name ?? "Sin aula",
+      classroomName: classroom?.name ?? UNASSIGNED_CLASSROOM_LABEL,
       classroomSlug: classroom?.slug ?? "",
       educatorName: educator?.full_name ?? null,
       scheduleLabel: getScheduleLabel(child.schedule),
@@ -164,9 +178,7 @@ export async function getClassroomPanelData(): Promise<ClassroomPanelData> {
   });
 
   const protocols: HealthProtocol[] = childrenResult.data.flatMap((child) => {
-    const allergyEntries = allergiesByChildId.get(child.id) ?? [];
-    const allergyLabels = getAllergyLabels(allergyEntries);
-    const urgent = healthByChildId.get(child.id)?.urgent_medical_flag ?? false;
+    const { allergyEntries, allergyLabels, urgent } = getChildHealth(child.id);
 
     if (allergyLabels.length === 0 && !urgent) {
       return [];
@@ -180,22 +192,25 @@ export async function getClassroomPanelData(): Promise<ClassroomPanelData> {
     const baseDescription =
       firstNote ??
       (allergyLabels.length > 0
-        ? `Alergias registradas: ${allergyLabels.join(" · ")}.`
+        ? `${ALLERGIES_DESCRIPTION_PREFIX}: ${allergyLabels.join(LABEL_SEPARATOR)}.`
         : "");
 
     const description = urgent
       ? baseDescription
-        ? `${baseDescription} Aviso médico urgente activado.`
-        : "Aviso médico urgente activado."
+        ? `${baseDescription} ${URGENT_ALERT_DESCRIPTION}`
+        : URGENT_ALERT_DESCRIPTION
       : baseDescription;
 
     const tone: Tone = urgent ? "error" : "tertiary";
 
     return [
       {
-        id: `protocol-${child.id}`,
+        id: `${PROTOCOL_ID_PREFIX}${child.id}`,
         childName: child.full_name,
-        tag: allergyLabels.length > 0 ? allergyLabels.join(" · ") : "Alerta médica",
+        tag:
+          allergyLabels.length > 0
+            ? allergyLabels.join(LABEL_SEPARATOR)
+            : URGENT_ALERT_TAG,
         tagTone: tone,
         dotTone: tone,
         description,

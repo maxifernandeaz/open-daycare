@@ -7,8 +7,24 @@ import { createClient } from "@/utils/supabase/server";
 
 export type ActivateAccountState = {
   error?: string;
-  success?: boolean;
 };
+
+type AdminClient = ReturnType<typeof createAdminClient>;
+
+type ProfileResolution =
+  | { status: "ok"; profileId: string; wasActive: boolean }
+  | { status: "error"; message: string };
+
+const ACTIVATION_FIELDS = {
+  inviteCode: "inviteCode",
+  email: "email",
+  password: "password",
+  photoConsent: "photoConsent",
+} as const;
+
+const CHECKBOX_CHECKED_VALUE = "on";
+const TUTOR_ROLE = "tutor";
+const ACTIVE_STATUS = "active";
 
 const INVALID_INVITATION =
   "Esta invitación no es válida o ya venció.";
@@ -23,15 +39,84 @@ const REQUIRED_FIELDS_ERROR =
 const CONFIG_ERROR =
   "La activación no está disponible: falta configuración del servidor (SUPABASE_SERVICE_ROLE_KEY). Contactá a la guardería.";
 
+function readFormField(formData: FormData, name: string): string {
+  const value = formData.get(name);
+  return typeof value === "string" ? value : "";
+}
+
+function getAdminClient(): AdminClient | null {
+  try {
+    return createAdminClient();
+  } catch {
+    return null;
+  }
+}
+
+async function resolveProfile(
+  admin: AdminClient,
+  email: string,
+  password: string,
+): Promise<ProfileResolution> {
+  const { data: existingProfile, error: profileError } = await admin
+    .from("profiles")
+    .select("id, role, status")
+    .ilike("email", email)
+    .maybeSingle();
+
+  if (profileError) {
+    return { status: "error", message: GENERIC_ERROR };
+  }
+
+  if (!existingProfile) {
+    const { data: createdUser, error: createUserError } =
+      await admin.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+      });
+
+    if (createUserError || !createdUser.user) {
+      return { status: "error", message: GENERIC_ERROR };
+    }
+
+    return {
+      status: "ok",
+      profileId: createdUser.user.id,
+      wasActive: false,
+    };
+  }
+
+  if (existingProfile.role !== TUTOR_ROLE) {
+    return { status: "error", message: STAFF_EMAIL };
+  }
+
+  const wasActive = existingProfile.status === ACTIVE_STATUS;
+
+  if (!wasActive) {
+    const { error: updateAuthError } = await admin.auth.admin.updateUserById(
+      existingProfile.id,
+      { password, email_confirm: true },
+    );
+
+    if (updateAuthError) {
+      return { status: "error", message: GENERIC_ERROR };
+    }
+  }
+
+  return { status: "ok", profileId: existingProfile.id, wasActive };
+}
+
 export async function activateAccount(
   _previousState: ActivateAccountState,
   formData: FormData,
 ): Promise<ActivateAccountState> {
-  const rawCode = String(formData.get("inviteCode") ?? "");
+  const rawCode = readFormField(formData, ACTIVATION_FIELDS.inviteCode);
   const normalizedCode = rawCode.replace(/\s+/g, "").toUpperCase();
-  const email = String(formData.get("email") ?? "").trim();
-  const password = String(formData.get("password") ?? "");
-  const photoConsent = formData.get("photoConsent") === "on";
+  const email = readFormField(formData, ACTIVATION_FIELDS.email).trim();
+  const password = readFormField(formData, ACTIVATION_FIELDS.password);
+  const photoConsent =
+    readFormField(formData, ACTIVATION_FIELDS.photoConsent) ===
+    CHECKBOX_CHECKED_VALUE;
 
   if (!normalizedCode || !email || !password) {
     return { error: REQUIRED_FIELDS_ERROR };
@@ -55,64 +140,22 @@ export async function activateAccount(
     return { error: EMAIL_MISMATCH };
   }
 
-  let admin: ReturnType<typeof createAdminClient>;
+  const admin = getAdminClient();
 
-  try {
-    admin = createAdminClient();
-  } catch {
+  if (!admin) {
     return { error: CONFIG_ERROR };
   }
 
-  const { data: existingProfile, error: profileError } = await admin
-    .from("profiles")
-    .select("id, role, status")
-    .ilike("email", email)
-    .maybeSingle();
+  const profile = await resolveProfile(admin, email, password);
 
-  if (profileError) {
-    return { error: GENERIC_ERROR };
-  }
-
-  if (existingProfile && existingProfile.role !== "tutor") {
-    return { error: STAFF_EMAIL };
-  }
-
-  let profileId: string;
-  let wasActive = false;
-
-  if (existingProfile) {
-    profileId = existingProfile.id;
-    wasActive = existingProfile.status === "active";
-
-    if (!wasActive) {
-      const { error: updateAuthError } = await admin.auth.admin.updateUserById(
-        existingProfile.id,
-        { password, email_confirm: true },
-      );
-
-      if (updateAuthError) {
-        return { error: GENERIC_ERROR };
-      }
-    }
-  } else {
-    const { data: createdUser, error: createUserError } =
-      await admin.auth.admin.createUser({
-        email,
-        password,
-        email_confirm: true,
-      });
-
-    if (createUserError || !createdUser.user) {
-      return { error: GENERIC_ERROR };
-    }
-
-    profileId = createdUser.user.id;
+  if (profile.status === "error") {
+    return { error: profile.message };
   }
 
   const { error: statusError } = await admin
     .from("profiles")
-    .update({ status: "active" })
-    .eq("id", profileId);
+    .update({ status: ACTIVE_STATUS })
+    .eq("id", profile.profileId);
 
   if (statusError) {
     return { error: GENERIC_ERROR };
@@ -124,7 +167,7 @@ export async function activateAccount(
   });
 
   if (signInError) {
-    return { error: wasActive ? WRONG_PASSWORD : GENERIC_ERROR };
+    return { error: profile.wasActive ? WRONG_PASSWORD : GENERIC_ERROR };
   }
 
   const { error: acceptError } = await supabase.rpc(

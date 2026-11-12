@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import Icon from "@/app/components/Icons";
 import ActionDock from "@/app/components/panel-aula/ActionDock";
 import ActivityLogPanel from "@/app/components/panel-aula/ActivityLogPanel";
 import AppHeader from "@/app/components/panel-aula/AppHeader";
@@ -10,8 +12,17 @@ import OpsHero from "@/app/components/panel-aula/OpsHero";
 import PickupQueuePanel from "@/app/components/panel-aula/PickupQueuePanel";
 import StudentRoster from "@/app/components/panel-aula/StudentRoster";
 import { MAIN_TOP_CLASS, SIDEBAR_OFFSET_CLASS } from "@/app/components/panel-aula/shell";
-import { requireStaff } from "@/utils/auth";
+import { requireStaff, type CurrentProfile } from "@/utils/auth";
 import { getClassroomPanelData } from "./queries";
+
+const PUBLICATIONS_LINK_CLASSES =
+  "inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface-container-lowest shadow-sm text-on-surface font-label-lg text-label-lg hover:bg-surface-container transition-colors";
+
+const INVITE_ROLES: ReadonlySet<CurrentProfile["role"]> = new Set([
+  "admin",
+  "director",
+  "educator",
+]);
 
 export const metadata: Metadata = {
   title: "KiddiCare · Panel de Aula",
@@ -20,13 +31,9 @@ export const metadata: Metadata = {
 };
 
 export default async function PanelAulaPage() {
-  const profile = await requireStaff();
-  const canInvite =
-    profile.role === "admin" ||
-    profile.role === "director" ||
-    profile.role === "educator";
-  const { students, protocols, totalChildren, error } =
-    await getClassroomPanelData();
+  const [profile, { students, protocols, totalChildren, error }] =
+    await Promise.all([requireStaff(), getClassroomPanelData()]);
+  const canInvite = INVITE_ROLES.has(profile.role);
 
   return (
     <>
@@ -36,6 +43,18 @@ export default async function PanelAulaPage() {
         className={`relative ${MAIN_TOP_CLASS} ${SIDEBAR_OFFSET_CLASS} w-full bg-background min-h-screen font-body-md text-body-md`}
       >
         <div className="flex flex-col w-full px-8 pb-16 space-y-6">
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-6">
+            <p className="font-body-md text-body-md text-on-surface-variant">
+              Compartí novedades del aula con las familias.
+            </p>
+            <Link
+              className={PUBLICATIONS_LINK_CLASSES}
+              href="/panel-aula/entradas"
+            >
+              <Icon className="text-primary" name="campaign" size={20} />
+              <span>Publicaciones</span>
+            </Link>
+          </div>
           <OpsHero />
           <KpiRow totalChildren={totalChildren} />
           <ActionDock

@@ -197,9 +197,9 @@ idle → validando → creando entrada → subiendo (n/m) → registrando imáge
 
 ## Acceptance criteria
 
-- [ ] `/panel-aula/entradas`, `/panel-aula/entradas/nueva` y `/panel-aula/entradas/[id]/editar` llaman a `requireStaff()`; un tutor es redirigido a `/`.
-- [ ] `app/panel-aula/page.tsx` muestra un enlace “Publicaciones” hacia `/panel-aula/entradas` para todo el staff.
-- [ ] El listado del staff muestra las entradas visibles por RLS, 20 por página, con título, categoría, aula, autor, fecha y miniaturas.
+- [x] `/panel-aula/entradas`, `/panel-aula/entradas/nueva` y `/panel-aula/entradas/[id]/editar` llaman a `requireStaff()`; un tutor es redirigido a `/`.
+- [x] `app/panel-aula/page.tsx` muestra un enlace “Publicaciones” hacia `/panel-aula/entradas` para todo el staff.
+- [x] El listado del staff muestra las entradas visibles por RLS, 20 por página, con título, categoría, aula, autor, fecha y miniaturas.
 - [ ] Un manager ve la opción “Todas las aulas” en el formulario; un educador solo ve sus aulas asignadas y no ve la opción global.
 - [ ] Un educador sin aulas asignadas ve un mensaje y no puede enviar el formulario.
 - [ ] Se puede publicar una entrada solo texto; aparece en `/panel-aula/entradas` y en `/` sin recargar manualmente.

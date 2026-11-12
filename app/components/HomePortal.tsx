@@ -2,10 +2,9 @@
 
 /* eslint-disable @next/next/no-img-element */
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import ChildSummary from "@/app/components/ChildSummary";
 import MetricCards from "@/app/components/MetricCards";
-import TeacherHighlight from "@/app/components/TeacherHighlight";
 import TimelineSection from "@/app/components/TimelineSection";
 import SafetySidebar from "@/app/components/SafetySidebar";
 import PickupModal from "@/app/components/PickupModal";
@@ -13,8 +12,12 @@ import LogoutButton from "@/app/components/auth/LogoutButton";
 import Toast, { type ToastNotification } from "@/app/components/Toast";
 import { dailyHome, homeConfig, type AuthorizedPerson } from "@/data/mock";
 
-export default function HomePortal() {
-  const { child, metrics, timeline, highlight } = dailyHome;
+type HomePortalProps = {
+  feed: ReactNode;
+};
+
+export default function HomePortal({ feed }: HomePortalProps) {
+  const { child, metrics, timeline } = dailyHome;
 
   const [toast, setToast] = useState<ToastNotification | null>(null);
   const [authModalOpen, setAuthModalOpen] = useState(false);
@@ -50,8 +53,8 @@ export default function HomePortal() {
           <ChildSummary child={child} onNotify={notify} onOpenAuth={openAuthModal} />
           <MetricCards metrics={metrics} />
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            <div className="lg:col-span-8 flex flex-col gap-6">
-              <TeacherHighlight post={highlight} onNotify={notify} />
+            <div className="lg:col-span-8 min-w-0 flex flex-col gap-6">
+              {feed}
               <TimelineSection
                 events={timeline}
                 feedDate={homeConfig.dates.feedDate}
